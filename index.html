@@ -1,0 +1,3451 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>姐妹快跑</title>
+  <link rel="icon" href="data:," />
+  <link rel="preload" as="image" href="./assets/backgrounds/daytime_v2.webp" type="image/webp" />
+  <style>
+    :root {
+      --ink: #07080f;
+      --deep: #0d1222;
+      --panel: #121a2f;
+      --paper: #ffe8b8;
+      --hot: #ef2d58;
+      --pink: #ff7ab8;
+      --cyan: #24d8ff;
+      --lime: #90e85a;
+      --gold: #ffd35a;
+      --muted: #7c91a9;
+      --shadow: rgba(7, 8, 15, .72);
+      --font: "Arial Black", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      --pixel-font: "Press Start 2P", "Silkscreen", "Arial Black", "PingFang SC", "Microsoft YaHei", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      overflow: hidden;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--font);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    #gameShell {
+      position: relative;
+      width: min(100vw, 177.78vh);
+      height: min(100vh, 56.25vw);
+      min-width: 320px;
+      min-height: 180px;
+      background: var(--ink);
+      overflow: hidden;
+      box-shadow: 0 0 0 6px var(--ink), 0 24px 70px rgba(0, 0, 0, .62);
+      image-rendering: pixelated;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: pixelated;
+      background: var(--deep);
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    #hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      padding: clamp(8px, 1.6vw, 18px);
+      font-weight: 900;
+      text-shadow: 3px 3px 0 var(--ink), -2px 2px 0 var(--ink), 2px -2px 0 var(--ink);
+    }
+
+    .hud-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) minmax(160px, 360px) minmax(126px, 1fr);
+      align-items: start;
+      gap: 12px;
+    }
+
+    #lives {
+      display: flex;
+      gap: clamp(5px, .8vw, 10px);
+      align-items: center;
+      min-height: 34px;
+    }
+
+    #scorePanel {
+      justify-self: end;
+      text-align: right;
+      font-size: clamp(13px, 2.1vw, 24px);
+      line-height: 1.1;
+    }
+
+    #padsPanel {
+      margin-top: 5px;
+      color: var(--paper);
+    }
+
+    .pixelHeart,
+    .padIcon {
+      position: relative;
+      display: inline-block;
+      width: 28px;
+      height: 24px;
+      filter: drop-shadow(3px 3px 0 var(--ink));
+      image-rendering: pixelated;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+
+    .visual-assets-ready .pixelHeart {
+      background-image: var(--asset-heart-full);
+    }
+
+    .visual-assets-ready .pixelHeart.empty {
+      opacity: .38;
+      filter: grayscale(1) brightness(.75) drop-shadow(3px 3px 0 var(--ink));
+    }
+
+    .visual-assets-ready .pixelHeart::before {
+      display: none;
+    }
+
+    .pixelHeart::before {
+      content: "";
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      left: 0;
+      top: 0;
+      background: var(--hot);
+      box-shadow:
+        4px 0 var(--hot), 16px 0 var(--hot), 20px 0 var(--hot),
+        0 4px var(--hot), 4px 4px #ff6b72, 8px 4px var(--hot), 12px 4px var(--hot), 16px 4px #ff6b72, 20px 4px var(--hot), 24px 4px var(--hot),
+        0 8px var(--hot), 4px 8px var(--hot), 8px 8px var(--hot), 12px 8px var(--hot), 16px 8px var(--hot), 20px 8px var(--hot), 24px 8px var(--hot),
+        4px 12px var(--hot), 8px 12px var(--hot), 12px 12px var(--hot), 16px 12px var(--hot), 20px 12px var(--hot),
+        8px 16px var(--hot), 12px 16px var(--hot), 16px 16px var(--hot),
+        12px 20px var(--hot);
+    }
+
+    .pixelHeart.empty::before {
+      background: #303a52;
+      box-shadow:
+        4px 0 #303a52, 16px 0 #303a52, 20px 0 #303a52,
+        0 4px #303a52, 4px 4px #45506a, 8px 4px #303a52, 12px 4px #303a52, 16px 4px #45506a, 20px 4px #303a52, 24px 4px #303a52,
+        0 8px #303a52, 4px 8px #303a52, 8px 8px #303a52, 12px 8px #303a52, 16px 8px #303a52, 20px 8px #303a52, 24px 8px #303a52,
+        4px 12px #303a52, 8px 12px #303a52, 12px 12px #303a52, 16px 12px #303a52, 20px 12px #303a52,
+        8px 16px #303a52, 12px 16px #303a52, 16px 16px #303a52,
+        12px 20px #303a52;
+    }
+
+    .padCount {
+      display: inline-flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+    }
+
+    .padIcon {
+      width: 52px;
+      height: 30px;
+      transform: rotate(-18deg);
+    }
+
+    .visual-assets-ready .padIcon {
+      background-image: none;
+    }
+
+    .padIcon::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 7px;
+      width: 40px;
+      height: 14px;
+      background: var(--paper);
+      border: 3px solid var(--ink);
+      clip-path: polygon(11% 0, 89% 0, 100% 50%, 89% 100%, 11% 100%, 0 50%);
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    .padIcon::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: 13px;
+      width: 24px;
+      height: 5px;
+      background: var(--pink);
+      box-shadow:
+        -5px -3px 0 #fff7dc,
+        5px 3px 0 var(--hot);
+    }
+
+    .padNumber {
+      color: var(--paper);
+      font-size: clamp(14px, 2vw, 24px);
+    }
+
+    #courageWrap {
+      align-self: start;
+      text-align: center;
+      font-size: clamp(10px, 1.4vw, 16px);
+      letter-spacing: 1px;
+    }
+
+    #courageTrack {
+      height: clamp(15px, 2.2vw, 24px);
+      margin-top: 4px;
+      border: 4px solid var(--ink);
+      background: var(--panel);
+      box-shadow: inset 0 0 0 3px rgba(255, 232, 184, .12), 0 3px 0 var(--ink);
+      overflow: hidden;
+    }
+
+    #courageFill {
+      width: 0%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--hot) 0 16px,
+        var(--gold) 16px 30px,
+        var(--lime) 30px 43px,
+        var(--cyan) 43px 58px
+      );
+      box-shadow: 0 0 18px rgba(255, 49, 95, .85);
+      transition: width .12s linear;
+    }
+
+    #courageWrap.reward-pulse #courageTrack {
+      animation: rewardPulse .34s ease-out;
+    }
+
+    #rewardStatus {
+      margin-top: 4px;
+      min-height: 14px;
+      color: var(--gold);
+      font-size: clamp(8px, 1vw, 12px);
+      line-height: 1;
+      text-shadow: 2px 2px 0 var(--ink), 0 0 9px rgba(255, 211, 90, .62);
+    }
+
+    #rewardStatus.reward-pulse {
+      animation: rewardTextPulse .34s ease-out;
+    }
+
+    @keyframes rewardPulse {
+      0%,
+      100% {
+        box-shadow: inset 0 0 0 3px rgba(255, 232, 184, .12), 0 3px 0 var(--ink);
+      }
+      50% {
+        box-shadow: inset 0 0 0 3px rgba(255, 232, 184, .22), 0 3px 0 var(--ink), 0 0 18px rgba(255, 211, 90, .86);
+      }
+    }
+
+    @keyframes rewardTextPulse {
+      0%,
+      100% {
+        color: var(--gold);
+      }
+      50% {
+        color: var(--paper);
+        text-shadow: 2px 2px 0 var(--ink), 0 0 8px rgba(255, 211, 90, .52);
+      }
+    }
+
+    #fearlessTimer {
+      position: absolute;
+      left: 50%;
+      top: clamp(46px, 8.2vw, 82px);
+      transform: translateX(-50%);
+      padding: 5px 14px 7px;
+      color: var(--paper);
+      background: linear-gradient(90deg, #14385a, #8f2048);
+      border: 4px solid var(--cyan);
+      box-shadow: 4px 4px 0 var(--ink), 0 0 14px rgba(36, 216, 255, .42);
+      font-size: clamp(12px, 2.2vw, 24px);
+      letter-spacing: .04em;
+      display: none;
+    }
+
+    #comboPanel {
+      position: absolute;
+      left: clamp(12px, 2vw, 24px);
+      top: clamp(48px, 8.2vw, 86px);
+      color: var(--gold);
+      font-size: clamp(12px, 2vw, 22px);
+      display: none;
+    }
+
+    #comboPanel.flash {
+      animation: comboGlow .32s ease-out;
+    }
+
+    @keyframes comboGlow {
+      0%,
+      100% {
+        filter: none;
+      }
+      50% {
+        filter: drop-shadow(0 0 7px rgba(255, 211, 90, .62));
+      }
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: linear-gradient(180deg, rgba(7, 8, 15, .34), rgba(7, 8, 15, .82));
+      pointer-events: auto;
+    }
+
+    #fileProtocolWarning {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 6;
+      padding: 10px 12px;
+      border: 4px solid var(--ink);
+      background: rgba(255, 211, 90, .94);
+      color: var(--ink);
+      box-shadow: 4px 4px 0 var(--ink);
+      font-size: clamp(11px, 1.4vw, 15px);
+      line-height: 1.35;
+      text-shadow: none;
+      pointer-events: none;
+      touch-action: none;
+    }
+
+    #orientationNotice {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      place-items: center;
+      padding: 28px;
+      background: var(--ink);
+      color: var(--paper);
+      text-align: center;
+    }
+
+    .orientationCard {
+      max-width: 320px;
+      padding: 26px 24px;
+      border: 4px solid var(--cyan);
+      background: var(--panel);
+      box-shadow: 6px 6px 0 var(--hot);
+    }
+
+    .orientationIcon {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--gold);
+      font-size: 48px;
+      line-height: 1;
+    }
+
+    .orientationCard strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 22px;
+    }
+
+    .orientationCard span:last-child {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .panel {
+      width: min(680px, 92vw);
+      padding: clamp(18px, 4vw, 38px);
+      border: 6px solid var(--ink);
+      background:
+        linear-gradient(135deg, rgba(18, 26, 47, .98), rgba(39, 32, 58, .98));
+      color: var(--paper);
+      box-shadow: 8px 8px 0 var(--ink), 0 0 0 6px rgba(255, 211, 90, .2);
+      text-align: center;
+    }
+
+    #startOverlay {
+      background: linear-gradient(180deg, rgba(7, 8, 15, .18), rgba(7, 8, 15, .46));
+    }
+
+    #startOverlay .panel {
+      width: min(560px, 58vw);
+      min-width: 420px;
+      max-width: 560px;
+      max-height: 55%;
+      overflow: visible;
+      padding: 30px 46px 26px;
+      border: 2px solid rgba(255, 255, 255, .22);
+      border-radius: 999px;
+      background: rgba(12, 14, 32, .62);
+      -webkit-backdrop-filter: blur(10px) saturate(130%);
+      backdrop-filter: blur(10px) saturate(130%);
+      box-shadow:
+        0 0 18px rgba(36, 216, 255, .24),
+        0 0 34px rgba(239, 45, 88, .18),
+        inset 0 0 18px rgba(255, 255, 255, .06);
+      font-family: var(--pixel-font);
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(44px, 9vw, 88px);
+      line-height: .92;
+      color: var(--hot);
+      text-shadow: 4px 4px 0 var(--ink), 8px 8px 0 #442036;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-top: 6px;
+      font-size: clamp(26px, 5.6vw, 58px);
+      line-height: 1;
+      color: var(--hot);
+      text-shadow: 3px 3px 0 var(--ink), 6px 6px 0 #442036;
+    }
+
+    .panel p {
+      margin-top: 14px;
+      font-size: clamp(14px, 2.4vw, 22px);
+      line-height: 1.45;
+      font-family: var(--pixel-font);
+      font-weight: 800;
+    }
+
+    #startOverlay h1 {
+      margin-bottom: 16px;
+      font-family: var(--pixel-font);
+      font-size: clamp(36px, 4.5vw, 58px);
+      line-height: .95;
+      text-shadow: 2px 2px 0 var(--ink), 0 0 12px rgba(239, 45, 88, .46);
+    }
+
+    #startOverlay .panel p {
+      margin-top: 0;
+      font-size: clamp(18px, 1.65vw, 20px);
+      line-height: 1.48;
+      font-family: var(--pixel-font);
+    }
+
+    .controlHelp {
+      display: grid;
+      gap: 0;
+    }
+
+    .controlHelp span {
+      display: block;
+    }
+
+    #startOverlay .gamepadHelp {
+      margin-top: 9px;
+      color: var(--cyan);
+      font-size: clamp(13px, 1.35vw, 16px);
+      line-height: 1.25;
+      text-shadow: 1px 1px 0 var(--ink), 0 0 8px rgba(36, 216, 255, .35);
+    }
+
+    #gamepadStatus {
+      min-height: 18px;
+      margin-top: 4px;
+      color: rgba(255, 232, 184, .78);
+      font-family: var(--pixel-font);
+      font-size: clamp(11px, 1.05vw, 13px);
+      line-height: 1.2;
+    }
+
+    #gamepadStatus.is-connected {
+      color: var(--lime);
+    }
+
+    .fearlessWord {
+      color: var(--gold);
+      text-shadow: 1px 1px 0 var(--ink), 0 0 10px rgba(255, 211, 90, .62);
+    }
+
+    .bigButton {
+      margin-top: 24px;
+      min-width: min(420px, 84vw);
+      min-height: 68px;
+      border: 6px solid var(--ink);
+      background: linear-gradient(180deg, var(--hot), #b91e43);
+      color: var(--paper);
+      font-family: var(--font);
+      font-size: clamp(24px, 5vw, 48px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 7px 7px 0 var(--ink), inset 0 5px 0 rgba(255, 232, 184, .35);
+      text-shadow: 3px 3px 0 var(--ink);
+      transform: translate(0, 0);
+    }
+
+    #startOverlay .bigButton {
+      display: block;
+      width: 60%;
+      min-width: 220px;
+      min-height: 58px;
+      margin: 18px auto 12px;
+      border-width: 4px;
+      border-radius: 999px;
+      font-family: var(--pixel-font);
+      font-size: clamp(24px, 2.3vw, 28px);
+      box-shadow: 4px 4px 0 rgba(7, 8, 15, .86), inset 0 4px 0 rgba(255, 232, 184, .32);
+      text-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .bigButton:active {
+      transform: translate(4px, 4px);
+      box-shadow: 3px 3px 0 var(--ink), inset 0 4px 0 rgba(255, 232, 184, .28);
+    }
+
+    #hint {
+      margin-top: 14px;
+      color: var(--gold);
+      font-size: clamp(12px, 1.8vw, 18px);
+    }
+
+    #startOverlay #hint {
+      margin-top: 0;
+      font-family: var(--pixel-font);
+      font-size: clamp(13px, 1.3vw, 15px);
+      line-height: 1.25;
+    }
+
+    .effectsToggle {
+      display: inline-grid;
+      grid-template-columns: 24px auto;
+      gap: 2px 9px;
+      align-items: center;
+      margin: 4px auto 10px;
+      color: var(--paper);
+      font-family: var(--pixel-font);
+      font-size: clamp(11px, 1.1vw, 13px);
+      line-height: 1.2;
+      cursor: pointer;
+    }
+
+    .effectsToggle input {
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      accent-color: var(--cyan);
+      cursor: pointer;
+    }
+
+    .effectsToggle .effectsHint {
+      grid-column: 2;
+      color: rgba(255, 232, 184, .72);
+      font-size: .72em;
+    }
+
+    #gameShell.reduced-effects #comboPanel.flash,
+    #gameShell.reduced-effects #courageWrap.reward-pulse #courageTrack,
+    #gameShell.reduced-effects #rewardStatus.reward-pulse {
+      animation: none;
+    }
+
+    #gameShell.reduced-effects #fearlessTimer {
+      box-shadow: 3px 3px 0 var(--ink), 0 0 7px rgba(239, 45, 88, .24);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #comboPanel.flash,
+      #courageWrap.reward-pulse #courageTrack,
+      #rewardStatus.reward-pulse {
+        animation: none;
+      }
+    }
+
+    #touchControls {
+      position: absolute;
+      inset-inline: 0;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      display: none;
+      justify-content: space-between;
+      align-items: end;
+      padding: 0 clamp(12px, 4vw, 32px);
+      pointer-events: none;
+    }
+
+    .touchGroup {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    .touchButton {
+      width: clamp(58px, 12vw, 88px);
+      height: clamp(58px, 12vw, 88px);
+      border: 4px solid var(--paper);
+      background: rgba(13, 18, 34, .78);
+      color: var(--paper);
+      font-family: var(--font);
+      font-size: clamp(14px, 3vw, 22px);
+      font-weight: 900;
+      box-shadow: 4px 4px 0 var(--ink);
+      text-shadow: 2px 2px 0 var(--ink);
+      touch-action: none;
+    }
+
+    .touchButton.wide {
+      width: clamp(106px, 22vw, 158px);
+      background: rgba(239, 45, 88, .82);
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      #touchControls {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .hud-row {
+        grid-template-columns: 1fr 1.35fr 1fr;
+        gap: 7px;
+      }
+
+      #gameShell {
+        width: 100vw;
+        height: min(100vh, 64vw);
+      }
+
+      #scorePanel {
+        font-size: 12px;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 520px) {
+      #touchControls {
+        display: flex;
+        bottom: max(6px, env(safe-area-inset-bottom));
+        padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+      }
+
+      .touchButton {
+        width: clamp(52px, 10vw, 72px);
+        height: clamp(52px, 10vw, 72px);
+      }
+
+      .touchButton.wide {
+        width: clamp(100px, 18vw, 132px);
+      }
+    }
+
+    @media (orientation: portrait) and (max-width: 720px) {
+      #gameShell {
+        width: 100vw;
+        height: 56.25vw;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      #orientationNotice {
+        display: grid;
+      }
+    }
+
+    #gameShell:not(.is-playing) #touchControls {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      #startOverlay {
+        place-items: start center;
+        padding: clamp(12px, 4vh, 22px) 0 76px;
+      }
+
+      #startOverlay .panel {
+        width: min(84vw, 340px);
+        min-width: unset;
+        max-width: 340px;
+        max-height: 45%;
+        padding: 22px 24px 20px;
+        border-width: 2px;
+        border-radius: 999px;
+        box-shadow:
+          0 0 14px rgba(36, 216, 255, .22),
+          0 0 24px rgba(239, 45, 88, .16),
+          inset 0 0 14px rgba(255, 255, 255, .06);
+      }
+
+      #startOverlay h1 {
+        margin-bottom: 14px;
+        font-size: clamp(28px, 8vw, 40px);
+        line-height: 1;
+        text-shadow: 2px 2px 0 var(--ink), 0 0 10px rgba(239, 45, 88, .42);
+      }
+
+      #startOverlay .panel p {
+        font-size: clamp(12px, 3.5vw, 15px);
+        line-height: 1.6;
+      }
+
+      #startOverlay .bigButton {
+        width: 60%;
+        min-width: 180px;
+        min-height: 50px;
+        margin: 16px auto 12px;
+        border-width: 3px;
+        font-size: clamp(18px, 5.4vw, 22px);
+        box-shadow: 3px 3px 0 rgba(7, 8, 15, .86), inset 0 3px 0 rgba(255, 232, 184, .3);
+      }
+
+      #startOverlay #hint {
+        font-size: clamp(11px, 3.2vw, 14px);
+        line-height: 1.35;
+      }
+    }
+
+    @media (orientation: portrait) and (max-width: 480px) {
+      #startOverlay {
+        padding: clamp(12px, 3.2vh, 18px) 0 64px;
+      }
+
+      #startOverlay .panel {
+        padding: 16px 18px 14px;
+        max-height: none;
+      }
+
+      #startOverlay h1 {
+        margin-bottom: 10px;
+        font-size: clamp(28px, 7.2vw, 34px);
+      }
+
+      #startOverlay .panel p {
+        font-size: clamp(12px, 3.1vw, 13px);
+        line-height: 1.34;
+      }
+
+      #startOverlay .bigButton {
+        min-width: 180px;
+        min-height: 46px;
+        margin: 12px auto 8px;
+        font-size: clamp(18px, 4.8vw, 20px);
+      }
+
+      #startOverlay #hint {
+        font-size: clamp(10px, 2.8vw, 12px);
+        line-height: 1.22;
+      }
+    }
+
+    @media (max-height: 520px) and (min-width: 769px) {
+      #startOverlay .panel {
+        width: min(460px, 58vw);
+        min-width: 400px;
+        max-height: none;
+        padding: 12px 30px;
+      }
+
+      #startOverlay h1 {
+        margin-bottom: 8px;
+        font-size: clamp(28px, 4vw, 34px);
+        line-height: .92;
+      }
+
+      #startOverlay .panel p {
+        font-size: clamp(12px, 1.6vw, 13px);
+        line-height: 1.25;
+      }
+
+      #startOverlay .bigButton {
+        min-height: 42px;
+        margin: 8px auto 6px;
+        border-width: 3px;
+        font-size: clamp(18px, 2vw, 20px);
+      }
+
+      #startOverlay #hint {
+        font-size: clamp(9px, 1.4vw, 10px);
+        line-height: 1.15;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="gameShell" aria-label="姐妹快跑网页游戏">
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <section id="hud" aria-live="polite">
+      <div class="hud-row">
+        <div id="lives" aria-label="5 条生命"></div>
+        <div id="courageWrap">
+          COURAGE
+          <div id="courageTrack"><div id="courageFill"></div></div>
+          <div id="rewardStatus">FEARLESS READY</div>
+        </div>
+        <div id="scorePanel">
+          <div id="score">Score 0</div>
+          <div id="padsPanel" class="padCount" aria-label="卫生巾数量 20"></div>
+        </div>
+      </div>
+      <div id="comboPanel">COMBO ×1</div>
+      <div id="fearlessTimer">READY</div>
+    </section>
+
+    <section id="startOverlay" class="overlay">
+      <div class="panel">
+        <h1>姐妹快跑</h1>
+        <p class="controlHelp">
+          <span>↑ / W：跳跃</span>
+          <span>轻按 Space：投掷卫生巾</span>
+          <span>长按 Space：蓄力</span>
+          <span>松开 Space：冲撞</span>
+        </p>
+        <p class="gamepadHelp">手柄 A：跳跃 · X：投掷/蓄力 · Menu：开始</p>
+        <div id="gamepadStatus" aria-live="polite">手柄未检测 · 请按任意手柄键</div>
+        <label class="effectsToggle">
+          <input id="reduceEffectsToggle" type="checkbox" />
+          <span>减少特效</span>
+          <span class="effectsHint">关闭装饰飞出物与震动</span>
+        </label>
+        <button id="startButton" class="bigButton" type="button">开始跑！</button>
+        <div id="hint">连续打飞 3 个障碍，进入 <span class="fearlessWord">FEARLESS！！！</span></div>
+      </div>
+    </section>
+
+    <section id="endOverlay" class="overlay" hidden>
+      <div class="panel">
+        <h2 id="endTitle">再跑一次。</h2>
+        <p id="endStats">Score 0</p>
+        <button id="restartButton" class="bigButton" type="button">再跑一局</button>
+      </div>
+    </section>
+
+    <div id="touchControls" aria-hidden="true">
+      <div class="touchGroup">
+        <button id="touchJump" class="touchButton" type="button">↑</button>
+      </div>
+      <div class="touchGroup">
+        <button id="touchAttack" class="touchButton wide" type="button">ATTACK</button>
+      </div>
+    </div>
+
+    <div id="fileProtocolWarning" hidden></div>
+  </main>
+
+  <aside id="orientationNotice" role="dialog" aria-label="请旋转手机" aria-live="polite">
+    <div class="orientationCard">
+      <span class="orientationIcon" aria-hidden="true">↻</span>
+      <strong>请横屏游玩</strong>
+      <span>旋转手机后即可开始姐妹快跑</span>
+    </div>
+  </aside>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.imageSmoothingEnabled = false;
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const groundY = 420;
+      const MAX_LIVES = 5;
+      const STARTING_PADS = 10;
+      const BGM_SRC = "assets/audio/bgm_main_loop.mp3";
+      const BGM_VOLUME = 0.25;
+      const EFFECTS_STORAGE_KEY = "sisterrun-reduced-effects";
+      const MAX_DECORATIVE_FLYOUTS = 3;
+      const DECORATIVE_FLYOUT_MIN_INTERVAL = .9;
+      const MAX_GROUND_SPEED_LINES = 4;
+      const DEV_WARNING_TEXT = "检测到 file:// 直接打开，资源可能加载失败。请通过 HTTP 静态服务器运行：python3 -m http.server 8000 -d dist，然后访问 http://127.0.0.1:8000/";
+
+      const hud = {
+        shell: document.getElementById("gameShell"),
+        lives: document.getElementById("lives"),
+        score: document.getElementById("score"),
+        pads: document.getElementById("padsPanel"),
+        courage: document.getElementById("courageFill"),
+        courageWrap: document.getElementById("courageWrap"),
+        reward: document.getElementById("rewardStatus"),
+        fearless: document.getElementById("fearlessTimer"),
+        combo: document.getElementById("comboPanel"),
+        start: document.getElementById("startOverlay"),
+        end: document.getElementById("endOverlay"),
+        endTitle: document.getElementById("endTitle"),
+        endStats: document.getElementById("endStats"),
+        startButton: document.getElementById("startButton"),
+        restartButton: document.getElementById("restartButton"),
+        reduceEffects: document.getElementById("reduceEffectsToggle"),
+        touchJump: document.getElementById("touchJump"),
+        touchAttack: document.getElementById("touchAttack"),
+        gamepadStatus: document.getElementById("gamepadStatus"),
+        fileWarning: document.getElementById("fileProtocolWarning")
+      };
+
+      const ART = {
+        ink: "#07080f",
+        ink2: "#0d1222",
+        panel: "#121a2f",
+        panel2: "#1b2540",
+        paper: "#ffe8b8",
+        white: "#fff7dc",
+        hot: "#ef2d58",
+        hotDark: "#b91e43",
+        pink: "#ff7ab8",
+        cyan: "#24d8ff",
+        gold: "#ffd35a",
+        lime: "#90e85a",
+        smoke: "#56616e",
+        smokeHi: "#9aa6ae",
+        skin: "#ffc08c",
+        skinShade: "#e69a62",
+        hair: "#ef2d3d",
+        hairDark: "#bd1328",
+        green: "#1f8f52",
+        greenDark: "#176c41",
+        denim: "#244146",
+        shoe: "#f5f7ff",
+        cityLine: "#3f5f7b"
+      };
+
+      const palettes = {
+        day: {
+          skyTop: "#7ec8e6",
+          skyBottom: "#e0f4f8",
+          back: "#8caabc",
+          mid: "#607f95",
+          near: "#263d58",
+          road: ART.ink2,
+          line: ART.gold,
+          sign: ART.hot,
+          neon: ART.cyan,
+          window: "#efd982"
+        },
+        night: {
+          skyTop: "#05060f",
+          skyBottom: "#111a3c",
+          back: "#17294b",
+          mid: "#22345f",
+          near: "#101b34",
+          road: ART.ink2,
+          line: ART.gold,
+          sign: ART.pink,
+          neon: ART.cyan,
+          window: "#ffe26f"
+        }
+      };
+
+      const jumpTexts = ["赶时间～", "借过一下。", "轻轻松松。", "今天状态不错。", "脚下生风。", "小场面。", "看不见我～", "再高一点！", "城市跑酷中。", "继续！"];
+      const attackTexts = ["下一个。", "别挡道。", "谢谢配合。", "已读，不回。", "退！退！退！", "请文明出行。", "公共场所，谢谢。", "不好意思，你出局了。", "飞远一点。", "精准投递。", "签收一下。", "卫生巾快递，请查收。", "今天没空惯着你。", "赶时间，让一让。", "别挡本王的道。"];
+      const chargeTexts = ["起飞——！", "886！", "一路顺风！", "慢走，不送。", "发射成功！", "腾空！", "物理说服。", "谢谢让路。", "本王先走了。", "下一位！", "BOOM！", "BANG！", "POW！", "K.O.！"];
+      const coughTexts = ["咳咳咳——"];
+      const endTexts = ["鞋带松了。", "刚才那个不算。", "再跑一次。", "这次只是热身。", "差一点点！", "刚刚手滑。", "下局见。", "重新出发！", "今天卫生巾 MVP。", "广州塔都快追不上你。", "建议障碍物提前请假。", "今天跑得比昨天更帅。"];
+      const comicPopupRules = {
+        jump: { chance: .12, cooldown: "normal", duration: .5, priority: 1, kind: "jump", normal: true, size: [16, 21] },
+        attack: { chance: .22, cooldown: "normal", duration: .58, priority: 2, kind: "attack", normal: true, size: [17, 23] },
+        charge: { chance: .45, cooldown: "normal", duration: .68, priority: 3, kind: "charge", normal: true, size: [19, 26] },
+        hype: { chance: 1, cooldown: "hype", duration: .75, priority: 4, kind: "fearless", normal: false, size: [22, 29] },
+        fearless: { chance: 1, cooldown: "none", duration: .72, priority: 5, kind: "fearless", normal: false, size: [28, 34] }
+      };
+      const MAX_NORMAL_POPUPS = 1;
+      const NORMAL_POPUP_COOLDOWN = 1.8;
+      const HYPE_POPUP_COOLDOWN = 6.5;
+      const chatter = {
+        smoke: ["抽一根怎么...", "这里又没人...", "我就站会儿..."],
+        harasser: ["美女，加个...", "别走啊...", "认识一下..."],
+        drunk: ["小姑娘...", "我跟你说...", "站住，我..."]
+      };
+
+      const rand = (min, max) => min + Math.random() * (max - min);
+      const pick = (list) => list[(Math.random() * list.length) | 0];
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const rectsHit = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+
+      /* FEARLESS_REWARD_RULES_START */
+      const FearlessRewardRules = (() => {
+        const COMBO_SECONDS = 10;
+        const COURAGE_PACK_SECONDS = 5;
+        const MAX_SECONDS = 15;
+
+        function nextDuration(current, rewardSeconds) {
+          const remaining = Math.max(0, current);
+          const reward = Math.max(0, rewardSeconds);
+          return Math.min(MAX_SECONDS, remaining + reward);
+        }
+
+        return { COMBO_SECONDS, COURAGE_PACK_SECONDS, MAX_SECONDS, nextDuration };
+      })();
+      /* FEARLESS_REWARD_RULES_END */
+
+      /* OBSTACLE_DIRECTOR_START */
+      const ObstacleDirector = (() => {
+        const STAGES = [
+          { id: "warmup", start: 0, comboSlots: 0, singleGap: 420, comboRest: 460 },
+          { id: "groove", start: 20, comboSlots: 3, singleGap: 400, comboRest: 450 },
+          { id: "switch", start: 45, comboSlots: 6, singleGap: 360, comboRest: 420 },
+          { id: "pressure", start: 75, comboSlots: 8, singleGap: 330, comboRest: 390 },
+          { id: "endurance", start: 90, comboSlots: 8, singleGap: 320, comboRest: 380 }
+        ];
+        const SPEED_POINTS = [
+          [0, 250],
+          [45, 330],
+          [90, 410],
+          [180, 470]
+        ];
+        const TYPES = ["smoke", "harasser", "drunk"];
+        const COMBOS = [
+          { id: "smoke-harasser", types: ["smoke", "harasser"], internalGap: 330, minStage: 1, weight: 3 },
+          { id: "harasser-smoke", types: ["harasser", "smoke"], internalGap: 360, minStage: 1, weight: 3 },
+          { id: "drunk-smoke", types: ["drunk", "smoke"], internalGap: 380, minStage: 1, weight: 3 },
+          { id: "smoke-drunk", types: ["smoke", "drunk"], internalGap: 380, minStage: 2, weight: 1 },
+          { id: "harasser-drunk", types: ["harasser", "drunk"], internalGap: 270, minStage: 1, weight: 1 }
+        ];
+        const FEARLESS_ORDER = ["smoke", "harasser", "drunk"];
+        const FEARLESS_LEAD_SECONDS = 0.6;
+        const FEARLESS_EXIT_SECONDS = 1;
+        const FEARLESS_RECOVERY_SECONDS = 1.2;
+        const FEARLESS_GAP_MIN = 180;
+        const FEARLESS_GAP_MAX = 205;
+
+        function stageAt(seconds) {
+          for (let index = STAGES.length - 1; index >= 0; index--) {
+            if (seconds >= STAGES[index].start) return STAGES[index];
+          }
+          return STAGES[0];
+        }
+
+        function speedAt(seconds) {
+          const time = Math.max(0, seconds);
+          for (let index = 1; index < SPEED_POINTS.length; index++) {
+            const [nextTime, nextSpeed] = SPEED_POINTS[index];
+            if (time <= nextTime) {
+              const [previousTime, previousSpeed] = SPEED_POINTS[index - 1];
+              const progress = (time - previousTime) / (nextTime - previousTime);
+              return previousSpeed + (nextSpeed - previousSpeed) * progress;
+            }
+          }
+          return SPEED_POINTS[SPEED_POINTS.length - 1][1];
+        }
+
+        function createSeededRandom(seed) {
+          let value = seed >>> 0;
+          return () => {
+            value = (value * 1664525 + 1013904223) >>> 0;
+            return value / 4294967296;
+          };
+        }
+
+        function shuffled(list, rng) {
+          const copy = list.slice();
+          for (let index = copy.length - 1; index > 0; index--) {
+            const swapIndex = Math.floor(rng() * (index + 1));
+            [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+          }
+          return copy;
+        }
+
+        function cloneUnit(unit, restGap) {
+          return {
+            id: unit.id,
+            types: unit.types.slice(),
+            internalGap: unit.internalGap,
+            restGap,
+            isCombo: unit.types.length > 1
+          };
+        }
+
+        function buildDeck(stageId, rng = Math.random) {
+          const stageIndex = STAGES.findIndex(stage => stage.id === stageId);
+          if (stageIndex < 0) throw new Error(`Unknown obstacle stage: ${stageId}`);
+          const stage = STAGES[stageIndex];
+          const weightedCombos = COMBOS
+            .filter(combo => combo.minStage <= stageIndex)
+            .flatMap(combo => Array.from({ length: combo.weight }, () => combo));
+          const comboUnits = [];
+          while (comboUnits.length < stage.comboSlots) {
+            const candidates = weightedCombos.filter(combo => combo.id !== comboUnits.at(-1)?.id);
+            const source = candidates.length ? candidates : weightedCombos;
+            comboUnits.push(cloneUnit(source[Math.floor(rng() * source.length)], stage.comboRest));
+          }
+          const singleCount = 12 - comboUnits.length;
+          const singleTypes = [];
+          const typeOrder = shuffled(TYPES, rng);
+          for (let index = 0; index < singleCount; index++) singleTypes.push(typeOrder[index % typeOrder.length]);
+          const singles = singleTypes.map(type => ({
+            id: `single-${type}`,
+            types: [type],
+            internalGap: 0,
+            restGap: stage.singleGap,
+            isCombo: false
+          }));
+          return shuffled(comboUnits.concat(singles), rng);
+        }
+
+        function create(rng = Math.random) {
+          return {
+            rng,
+            mode: "normal",
+            modeTime: 0,
+            stageId: null,
+            deck: [],
+            currentUnit: null,
+            unitIndex: 0,
+            distanceRemaining: STAGES[0].singleGap,
+            lastType: null,
+            sameTypeCount: 0,
+            lastComboId: null,
+            forceSingle: false,
+            fearlessIndex: 0
+          };
+        }
+
+        function unitIsLegal(state, unit) {
+          if (unit.isCombo && unit.id === state.lastComboId) return false;
+          if (state.sameTypeCount >= 2 && unit.types[0] === state.lastType) return false;
+          return true;
+        }
+
+        function safeSingle(state, stage) {
+          const candidates = TYPES.filter(type => !(state.sameTypeCount >= 2 && type === state.lastType));
+          const type = candidates[Math.floor(state.rng() * candidates.length)];
+          return { id: `single-${type}`, types: [type], internalGap: 0, restGap: stage.singleGap, isCombo: false };
+        }
+
+        function takeNextUnit(state, time) {
+          const stage = stageAt(time);
+          if (state.stageId !== stage.id) {
+            state.stageId = stage.id;
+            state.deck = [];
+          }
+          if (state.forceSingle) {
+            state.forceSingle = false;
+            return safeSingle(state, stage);
+          }
+          if (!state.deck.length) state.deck = buildDeck(stage.id, state.rng);
+          const legalIndex = state.deck.findIndex(unit => unitIsLegal(state, unit));
+          if (legalIndex < 0) {
+            state.deck.shift();
+            return safeSingle(state, stage);
+          }
+          return state.deck.splice(legalIndex, 1)[0];
+        }
+
+        function rememberType(state, type) {
+          if (type === state.lastType) state.sameTypeCount++;
+          else {
+            state.lastType = type;
+            state.sameTypeCount = 1;
+          }
+        }
+
+        function enterFearless(state) {
+          state.mode = "fearless-lead";
+          state.modeTime = FEARLESS_LEAD_SECONDS;
+          state.currentUnit = null;
+          state.unitIndex = 0;
+          state.deck = [];
+          state.distanceRemaining = 0;
+          state.fearlessIndex = Math.floor(state.rng() * FEARLESS_ORDER.length);
+        }
+
+        function extendFearless(state) {
+          if (state.mode !== "fearless-exit" && state.mode !== "recovery") return;
+          state.mode = "fearless-dense";
+          state.modeTime = 0;
+          state.currentUnit = null;
+          state.unitIndex = 0;
+          state.distanceRemaining = 0;
+        }
+
+        function advance(state, frame) {
+          if (state.mode === "fearless-lead") {
+            state.modeTime -= Math.max(0, frame.dt);
+            if (frame.fearlessRemaining <= FEARLESS_EXIT_SECONDS) state.mode = "fearless-exit";
+            else if (state.modeTime > 0) return null;
+            else state.mode = "fearless-dense";
+          }
+
+          if (state.mode === "fearless-dense") {
+            if (frame.fearlessRemaining <= FEARLESS_EXIT_SECONDS) {
+              state.mode = "fearless-exit";
+              return null;
+            }
+            state.distanceRemaining -= Math.max(0, frame.distance);
+            if (state.distanceRemaining > 0) return null;
+            const type = FEARLESS_ORDER[state.fearlessIndex % FEARLESS_ORDER.length];
+            state.fearlessIndex++;
+            state.distanceRemaining = FEARLESS_GAP_MIN + state.rng() * (FEARLESS_GAP_MAX - FEARLESS_GAP_MIN);
+            rememberType(state, type);
+            return { type, unitId: "fearless-rotation", unitStart: true, isCombo: true };
+          }
+
+          if (state.mode === "fearless-exit") {
+            if (frame.fearlessRemaining > 0) return null;
+            state.mode = "recovery";
+            state.modeTime = FEARLESS_RECOVERY_SECONDS;
+            return null;
+          }
+
+          if (state.mode === "recovery") {
+            state.modeTime -= Math.max(0, frame.dt);
+            if (state.modeTime > 0) return null;
+            state.mode = "normal";
+            state.forceSingle = true;
+            state.distanceRemaining = 0;
+          }
+
+          state.distanceRemaining -= Math.max(0, frame.distance);
+          if (state.distanceRemaining > 0) return null;
+          if (frame.unresolvedCount >= 2) return null;
+
+          if (!state.currentUnit) {
+            state.currentUnit = takeNextUnit(state, frame.time);
+            state.unitIndex = 0;
+          }
+
+          const unit = state.currentUnit;
+          const type = unit.types[state.unitIndex];
+          const event = {
+            type,
+            unitId: unit.id,
+            unitStart: state.unitIndex === 0,
+            isCombo: unit.isCombo
+          };
+
+          if (event.unitStart && unit.isCombo) state.lastComboId = unit.id;
+          rememberType(state, type);
+          state.unitIndex++;
+          if (state.unitIndex < unit.types.length) {
+            state.distanceRemaining = Math.max(1, unit.internalGap);
+          } else {
+            state.distanceRemaining = Math.max(1, unit.restGap);
+            state.currentUnit = null;
+            state.unitIndex = 0;
+          }
+          return event;
+        }
+
+        function onPlayerHurt(state, time) {
+          const stage = stageAt(time);
+          state.mode = "normal";
+          state.modeTime = 0;
+          state.currentUnit = null;
+          state.unitIndex = 0;
+          state.forceSingle = true;
+          state.distanceRemaining = stage.singleGap * 1.25;
+        }
+
+        return { stageAt, speedAt, buildDeck, createSeededRandom, create, enterFearless, extendFearless, advance, onPlayerHurt };
+      })();
+      /* OBSTACLE_DIRECTOR_END */
+
+      /* COURAGE_PACK_DIRECTOR_START */
+      const CouragePackDirector = (() => {
+        const OPENING_LOCK_SECONDS = 12;
+        const INTERVAL_SECONDS_MIN = 8;
+        const INTERVAL_SECONDS_MAX = 15;
+        const MIN_SPEED = 1;
+
+        function nextSeconds(rng) {
+          return INTERVAL_SECONDS_MIN + rng() * (INTERVAL_SECONDS_MAX - INTERVAL_SECONDS_MIN);
+        }
+
+        function create(rng, initialSpeed) {
+          const random = typeof rng === "function" ? rng : Math.random;
+          const secondsRemaining = nextSeconds(random);
+          return {
+            rng: random,
+            secondsRemaining,
+            distanceRemaining: Math.max(MIN_SPEED, initialSpeed) * secondsRemaining
+          };
+        }
+
+        function advance(state, frame) {
+          const speed = Math.max(MIN_SPEED, frame.speed);
+          state.secondsRemaining -= Math.max(0, frame.distance) / speed;
+          state.distanceRemaining = Math.max(0, state.secondsRemaining) * speed;
+          if (state.secondsRemaining > 0) return false;
+          if (frame.time < OPENING_LOCK_SECONDS || !frame.safeToSpawn || frame.hasPack) return false;
+          state.secondsRemaining = nextSeconds(state.rng);
+          state.distanceRemaining = speed * state.secondsRemaining;
+          return true;
+        }
+
+        return { create, advance };
+      })();
+      /* COURAGE_PACK_DIRECTOR_END */
+
+      /* GAMEPAD_INPUT_START */
+      const GamepadInput = (() => {
+        const BUTTON_A = 0;
+        const BUTTON_X = 2;
+        const BUTTON_MENU = 9;
+        const BUTTON_DPAD_UP = 12;
+        const LEFT_STICK_Y = 1;
+        const STICK_UP_TRIGGER = -.65;
+        const STICK_UP_RELEASE = -.35;
+
+        function create() {
+          return {
+            activeIndex: null,
+            aPressed: false,
+            xPressed: false,
+            menuPressed: false,
+            dpadUpPressed: false,
+            stickUp: false
+          };
+        }
+
+        function reset(state) {
+          state.activeIndex = null;
+          state.aPressed = false;
+          state.xPressed = false;
+          state.menuPressed = false;
+          state.dpadUpPressed = false;
+          state.stickUp = false;
+        }
+
+        function buttonPressed(pad, index) {
+          const button = pad.buttons && pad.buttons[index];
+          if (typeof button === "number") return button > .5;
+          return Boolean(button && (button.pressed || button.value > .5));
+        }
+
+        function axisValue(pad, index) {
+          const value = pad.axes && pad.axes[index];
+          return Number.isFinite(value) ? value : 0;
+        }
+
+        function hasActivity(pad) {
+          return (pad.buttons || []).some((button, index) => buttonPressed(pad, index)) ||
+            (pad.axes || []).some(value => Number.isFinite(value) && Math.abs(value) >= .5);
+        }
+
+        function baseAction(standardPads, unsupported, cancelCharge) {
+          const visiblePad = standardPads[0];
+          return {
+            jump: false,
+            attackPressed: false,
+            attackReleased: false,
+            menu: false,
+            cancelCharge,
+            connected: Boolean(visiblePad),
+            unsupported,
+            controllerName: visiblePad ? visiblePad.id || "Xbox Controller" : ""
+          };
+        }
+
+        function sample(state, gamepads) {
+          const pads = Array.from(gamepads || []).filter(pad => pad && pad.connected !== false);
+          const standardPads = pads.filter(pad => pad.mapping === "standard");
+          const unsupported = pads.some(pad => pad.mapping !== "standard");
+          let cancelCharge = false;
+          let activePad = state.activeIndex === null
+            ? null
+            : standardPads.find(pad => pad.index === state.activeIndex) || null;
+
+          if (state.activeIndex !== null && !activePad) {
+            cancelCharge = true;
+            reset(state);
+          }
+
+          if (!activePad) {
+            activePad = standardPads.find(hasActivity) || null;
+            if (activePad) state.activeIndex = activePad.index;
+          }
+
+          const action = baseAction(standardPads, unsupported, cancelCharge);
+          if (!activePad) return action;
+
+          const aPressed = buttonPressed(activePad, BUTTON_A);
+          const xPressed = buttonPressed(activePad, BUTTON_X);
+          const menuPressed = buttonPressed(activePad, BUTTON_MENU);
+          const dpadUpPressed = buttonPressed(activePad, BUTTON_DPAD_UP);
+          const stickY = axisValue(activePad, LEFT_STICK_Y);
+          const stickUp = state.stickUp
+            ? stickY < STICK_UP_RELEASE
+            : stickY <= STICK_UP_TRIGGER;
+
+          action.jump = (aPressed && !state.aPressed) ||
+            (dpadUpPressed && !state.dpadUpPressed) ||
+            (stickUp && !state.stickUp);
+          action.attackPressed = xPressed && !state.xPressed;
+          action.attackReleased = !xPressed && state.xPressed;
+          action.menu = menuPressed && !state.menuPressed;
+
+          state.aPressed = aPressed;
+          state.xPressed = xPressed;
+          state.menuPressed = menuPressed;
+          state.dpadUpPressed = dpadUpPressed;
+          state.stickUp = stickUp;
+          return action;
+        }
+
+        return { create, reset, sample };
+      })();
+      /* GAMEPAD_INPUT_END */
+
+      let lastTime = 0;
+      let audio = null;
+      let game;
+      let keyboardStartAttackPending = false;
+      let gamepadStartAttackPending = false;
+      const gamepadInputState = GamepadInput.create();
+      const touchStartAttackPointers = new Set();
+      let hudCache = Object.create(null);
+      const settings = {
+        reducedEffects: loadReducedEffectsPreference()
+      };
+      const visualAssets = {
+        manifest: null,
+        sheets: {},
+        images: {},
+        urls: {},
+        coreReady: false,
+        ready: false,
+        error: null
+      };
+
+      function loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error(`Could not load ${src}`));
+          image.src = src;
+        });
+      }
+
+      const VISUAL_FREEZE_MANIFEST = {
+        "schemaVersion": "visual-freeze-assets/v2",
+        "artBible": "../doc/ART_BIBLE.md",
+        "artRefactor": "../doc/ART_REFACTOR.md",
+        "rules": {
+                "noMixedAssets": true,
+                "transparentBackground": true,
+                "referenceLocked": true
+        },
+        "sprites": {
+                "player": {
+                        "basePath": "",
+                        "states": {
+                                "idle": {
+                                        "frames": 8,
+                                        "frameSize": [
+                                                319,
+                                                382
+                                        ],
+                                        "baselineY": 366,
+                                        "file": "player/run/heroine_run_sheet_8frames_transparent.png"
+                                },
+                                "run": {
+                                        "frames": 8,
+                                        "frameSize": [
+                                                319,
+                                                382
+                                        ],
+                                        "baselineY": 366,
+                                        "file": "player/run/heroine_run_sheet_8frames_transparent.png"
+                                },
+                                "jump": {
+                                        "frames": 3,
+                                        "frameSize": [
+                                                724,
+                                                724
+                                        ],
+                                        "baselineY": 604,
+                                        "file": "player/jump/heroine_jump_sheet_3frames_transparent.png"
+                                },
+                                "fall": {
+                                        "frames": 3,
+                                        "frameSize": [
+                                                724,
+                                                724
+                                        ],
+                                        "baselineY": 604,
+                                        "file": "player/jump/heroine_jump_sheet_3frames_transparent.png"
+                                },
+                                "throw": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                620,
+                                                724
+                                        ],
+                                        "baselineY": 577,
+                                        "file": "player/throw/heroine_throw_sheet_4frames_transparent.png"
+                                },
+                                "charge": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                543,
+                                                724
+                                        ],
+                                        "baselineY": 565,
+                                        "file": "player/charge/heroine_charge_sheet_4frames_transparent.png"
+                                },
+                                "dash": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                543,
+                                                724
+                                        ],
+                                        "baselineY": 565,
+                                        "file": "player/charge/heroine_charge_sheet_4frames_transparent.png"
+                                },
+                                "hurt": {
+                                        "frames": 3,
+                                        "frameSize": [
+                                                724,
+                                                724
+                                        ],
+                                        "baselineY": 604,
+                                        "file": "player/jump/heroine_jump_sheet_3frames_transparent.png"
+                                },
+                                "fearlessRun": {
+                                        "frames": 8,
+                                        "frameSize": [
+                                                320,
+                                                724
+                                        ],
+                                        "baselineY": 541,
+                                        "file": "player/fearlessmode/heroine_fearless_sheet_8frames_transparent.png"
+                                }
+                        }
+                },
+                "obstacles": {
+                        "basePath": "",
+                        "states": {
+                                "smokeIdle": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                627,
+                                                627
+                                        ],
+                                        "baselineY": 467,
+                                        "file": "enemies/smoke/smoke_obstacle_sheet_4frames_transparent.png"
+                                },
+                                "smokeExhale": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                627,
+                                                627
+                                        ],
+                                        "baselineY": 467,
+                                        "file": "enemies/smoke/smoke_obstacle_sheet_4frames_transparent.png"
+                                },
+                                "smokeLoop": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                627,
+                                                627
+                                        ],
+                                        "baselineY": 467,
+                                        "file": "enemies/smoke/smoke_obstacle_sheet_4frames_transparent.png"
+                                },
+                                "harasserIdle": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                627,
+                                                627
+                                        ],
+                                        "baselineY": 567,
+                                        "file": "enemies/harasser/harasser_sheet_4frames_transparent.png"
+                                },
+                                "harasserReach": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                627,
+                                                627
+                                        ],
+                                        "baselineY": 567,
+                                        "file": "enemies/harasser/harasser_sheet_4frames_transparent.png"
+                                },
+                                "harasserKnockback": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                627,
+                                                627
+                                        ],
+                                        "baselineY": 567,
+                                        "file": "enemies/harasser/harasser_sheet_4frames_transparent.png"
+                                },
+                                "drunkManSway": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                460,
+                                                627
+                                        ],
+                                        "baselineY": 538,
+                                        "file": "enemies/drunkman/drunkman_sheet_4frames_transparent.png"
+                                },
+                                "drunkManTumble": {
+                                        "frames": 4,
+                                        "frameSize": [
+                                                460,
+                                                627
+                                        ],
+                                        "baselineY": 538,
+                                        "file": "enemies/drunkman/drunkman_sheet_4frames_transparent.png"
+                                }
+                        }
+                },
+                "items": {
+                        "basePath": "",
+                        "states": {
+                                "padSpin": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                256,
+                                                256
+                                        ],
+                                        "baselineY": 256,
+                                        "file": "release/items/pad.png"
+                                },
+                                "courageEnergyPack": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                64,
+                                                64
+                                        ],
+                                        "baselineY": 64,
+                                        "file": "items/sanitary-pad-energy-pack.png"
+                                }
+                        }
+                },
+                "fx": {
+                        "basePath": "",
+                        "states": {
+                                "boom": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                384,
+                                                288
+                                        ],
+                                        "file": "release/fx/boom.png"
+                                },
+                                "bang": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                384,
+                                                288
+                                        ],
+                                        "file": "release/fx/bang.png"
+                                },
+                                "ko": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                384,
+                                                288
+                                        ],
+                                        "file": "release/fx/ko.png"
+                                },
+                                "spark": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                256,
+                                                256
+                                        ],
+                                        "file": "release/fx/stars.png"
+                                },
+                                "speedLine": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                512,
+                                                171
+                                        ],
+                                        "file": "release/fx/speedline.png"
+                                },
+                                "fearlessGlow": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                256,
+                                                256
+                                        ],
+                                        "file": "release/fx/stars.png"
+                                },
+                                "comicPop": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                384,
+                                                288
+                                        ],
+                                        "file": "release/fx/boom.png"
+                                },
+                                "starHit": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                256,
+                                                256
+                                        ],
+                                        "file": "release/fx/stars.png"
+                                },
+                                "dust": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                384,
+                                                288
+                                        ],
+                                        "file": "release/fx/dust.png"
+                                },
+                                "landingDust": {
+                                        "frames": 1,
+                                        "frameSize": [
+                                                384,
+                                                288
+                                        ],
+                                        "file": "release/fx/dust.png"
+                                }
+                        }
+                }
+        },
+        "background": {
+                "basePath": "backgrounds/",
+                "files": {
+                        "day": "daytime_v2.webp",
+                        "night": "nighttime_v2.webp"
+                }
+        },
+        "ui": {
+                "basePath": "",
+                "files": {
+                        "heartFull": "release/items/heart.png"
+                }
+        }
+};
+
+      const visualSourceLoads = new Map();
+      const visualPhaseLoads = new Map();
+      let deferredVisualLoad = null;
+
+      function visualPhaseForSprite(groupName, stateName) {
+        if (groupName === "player" && (stateName === "idle" || stateName === "run")) return "core";
+        if (groupName === "items" && stateName === "courageEnergyPack") return "core";
+        if (groupName === "player" || groupName === "obstacles") return "gameplay";
+        return "cosmetic";
+      }
+
+      function cachedVisualSource(src) {
+        if (!visualSourceLoads.has(src)) visualSourceLoads.set(src, loadImage(src));
+        return visualSourceLoads.get(src);
+      }
+
+      function loadVisualAssetPhase(phase) {
+        if (visualPhaseLoads.has(phase)) return visualPhaseLoads.get(phase);
+        const promise = (async () => {
+          const manifest = VISUAL_FREEZE_MANIFEST;
+          const jobs = [];
+          const track = (src, job) => jobs.push(job.catch(error => {
+            console.warn(`[Assets] 加载失败，已跳过：${src}`, error);
+          }));
+
+          for (const [groupName, group] of Object.entries(manifest.sprites || {})) {
+            for (const [stateName, state] of Object.entries(group.states || {})) {
+              if (visualPhaseForSprite(groupName, stateName) !== phase) continue;
+              const src = assetPath(group.basePath, state.file);
+              track(src, cachedVisualSource(src).then(image => {
+                const frameSize = state.frameSize || group.frameSize;
+                const frameWidth = frameSize ? frameSize[0] : image.width / state.frames;
+                const frameHeight = frameSize ? frameSize[1] : image.height;
+                visualAssets.sheets[`${groupName}.${stateName}`] = {
+                  image,
+                  frames: state.frames,
+                  frameWidth,
+                  frameHeight,
+                  baselineY: state.baselineY || group.baselineY || frameHeight,
+                  src
+                };
+              }));
+            }
+          }
+
+          for (const [name, file] of Object.entries(manifest.background?.files || {})) {
+            const assetPhase = name === "day" ? "core" : "gameplay";
+            if (assetPhase !== phase) continue;
+            const src = assetPath(manifest.background.basePath, file);
+            visualAssets.urls[`background.${name}`] = src;
+            track(src, cachedVisualSource(src).then(image => {
+              visualAssets.images[`background.${name}`] = image;
+            }));
+          }
+
+          if (phase === "cosmetic") {
+            for (const [name, file] of Object.entries(manifest.ui?.files || {})) {
+              const src = assetPath(manifest.ui.basePath, file);
+              visualAssets.urls[`ui.${name}`] = src;
+              track(src, cachedVisualSource(src).then(image => {
+                visualAssets.images[`ui.${name}`] = image;
+              }));
+            }
+          }
+
+          await Promise.all(jobs);
+          visualAssets.manifest = manifest;
+          if (phase === "core") visualAssets.coreReady = true;
+          if (phase === "cosmetic") {
+            visualAssets.ready = true;
+            applyVisualAssetStyles();
+          }
+        })();
+        visualPhaseLoads.set(phase, promise);
+        return promise;
+      }
+
+      function waitForVisualIdle() {
+        return new Promise(resolve => {
+          if ("requestIdleCallback" in window) window.requestIdleCallback(resolve, { timeout: 1000 });
+          else setTimeout(resolve, 50);
+        });
+      }
+
+      function startDeferredVisualAssets() {
+        if (deferredVisualLoad) return deferredVisualLoad;
+        deferredVisualLoad = new Promise(resolve => setTimeout(resolve, 800))
+          .then(() => loadVisualAssetPhase("gameplay"))
+          .then(waitForVisualIdle)
+          .then(() => loadVisualAssetPhase("cosmetic"))
+          .catch(error => {
+            visualAssets.error = error;
+            console.warn("Deferred visual assets failed to load", error);
+          });
+        return deferredVisualLoad;
+      }
+
+      function assetPath(basePath, file) {
+        return `assets/${basePath || ""}${file}`;
+      }
+
+      function getSprite(group, state) {
+        return visualAssets.sheets[`${group}.${state}`] || null;
+      }
+
+      function getVisualImage(group, name) {
+        return visualAssets.images[`${group}.${name}`] || null;
+      }
+
+      function getVisualUrl(group, name) {
+        return visualAssets.urls[`${group}.${name}`] || "";
+      }
+
+      function applyVisualAssetStyles() {
+        const root = document.documentElement.style;
+        const heart = getVisualUrl("ui", "heartFull");
+        const pad = getVisualUrl("ui", "padIcon");
+        const courageBg = getVisualUrl("ui", "courageBarBg");
+        const courageFill = getVisualUrl("ui", "courageBarFill");
+        const timerBg = getVisualUrl("ui", "fearlessTimerBg");
+        const score = getVisualUrl("ui", "scoreLabel");
+        if (heart) root.setProperty("--asset-heart-full", `url("${heart}")`);
+        if (pad) root.setProperty("--asset-pad-icon", `url("${pad}")`);
+        if (courageBg) root.setProperty("--asset-courage-bg", `url("${courageBg}")`);
+        if (courageFill) root.setProperty("--asset-courage-fill", `url("${courageFill}")`);
+        if (timerBg) root.setProperty("--asset-fearless-bg", `url("${timerBg}")`);
+        if (score) root.setProperty("--asset-score-label", `url("${score}")`);
+        document.body.classList.add("visual-assets-ready");
+        updateHud();
+      }
+
+      function spriteFrame(sprite, fps, offset) {
+        if (!sprite) return 0;
+        return Math.floor((game.time + (offset || 0)) * fps) % sprite.frames;
+      }
+
+      function drawSpriteFrame(sprite, frame, x, y, w, h, options) {
+        if (!sprite || sprite.image.complete === false) return false;
+        const opts = options || {};
+        const index = ((frame % sprite.frames) + sprite.frames) % sprite.frames;
+        ctx.save();
+        const previousSmoothing = ctx.imageSmoothingEnabled;
+        if (opts.smooth) ctx.imageSmoothingEnabled = true;
+      ctx.globalAlpha *= opts.alpha == null ? 1 : opts.alpha;
+        if (opts.shadowColor) {
+          ctx.shadowColor = opts.shadowColor;
+          ctx.shadowBlur = opts.shadowBlur || 0;
+        }
+        ctx.translate(x + w / 2, y + h / 2);
+        if (opts.rotation) ctx.rotate(opts.rotation);
+        if (opts.flipX) ctx.scale(-1, 1);
+        ctx.drawImage(
+          sprite.image,
+          index * sprite.frameWidth,
+          0,
+          sprite.frameWidth,
+          sprite.frameHeight,
+          -w / 2,
+          -h / 2,
+          w,
+          h
+        );
+        ctx.imageSmoothingEnabled = previousSmoothing;
+        ctx.restore();
+        return true;
+      }
+
+      function drawSpriteCentered(group, state, frame, cx, cy, size, options) {
+        const sprite = getSprite(group, state);
+        return drawSpriteFrame(sprite, frame, cx - size / 2, cy - size / 2, size, size, options);
+      }
+
+      function drawSpriteOnBaseline(group, state, frame, cx, baselineY, scale, options) {
+        const sprite = getSprite(group, state);
+        if (!sprite) return false;
+        const w = sprite.frameWidth * scale;
+        const h = sprite.frameHeight * scale;
+        return drawSpriteFrame(sprite, frame, cx - w / 2, baselineY - sprite.baselineY * scale, w, h, options);
+      }
+
+      function drawSpriteOnBaselineHeight(group, state, frame, cx, baselineY, targetHeight, options) {
+        const sprite = getSprite(group, state);
+        if (!sprite) return false;
+        return drawSpriteOnBaseline(group, state, frame, cx, baselineY, targetHeight / sprite.frameHeight, options);
+      }
+
+      function createAudio() {
+        let actx;
+        let master;
+        let beat = 0;
+        let next = 0;
+        let bgmStarted = false;
+        let bgmSourceAssigned = false;
+        const bgm = new Audio();
+        bgm.loop = true;
+        bgm.preload = "none";
+        bgm.volume = BGM_VOLUME;
+        bgm.addEventListener("error", (event) => {
+          console.warn("[Audio] BGM load failed", event);
+        });
+
+        function ensureBgmSource() {
+          if (bgmSourceAssigned) return;
+          bgm.src = BGM_SRC;
+          bgmSourceAssigned = true;
+        }
+
+        function playBgm(restart = false) {
+          ensureBgmSource();
+          bgm.volume = BGM_VOLUME;
+          if (restart) bgm.currentTime = 0;
+          if (bgmStarted && !bgm.paused) return;
+          const playPromise = bgm.play();
+          if (playPromise && typeof playPromise.catch === "function") {
+            playPromise
+              .then(() => {
+                bgmStarted = true;
+              })
+              .catch(error => {
+                console.warn("[Audio] BGM play blocked or failed", error);
+              });
+          } else {
+            bgmStarted = true;
+          }
+        }
+
+        function stopBgm() {
+          bgm.pause();
+        }
+
+        function ensure() {
+          if (!actx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return null;
+            actx = new AudioContext();
+            master = actx.createGain();
+            master.gain.value = 0.055;
+            master.connect(actx.destination);
+          }
+          if (actx.state === "suspended") actx.resume();
+          return actx;
+        }
+
+        function tone(freq, dur, type, gain, at) {
+          const ctxAudio = ensure();
+          if (!ctxAudio) return;
+          const osc = ctxAudio.createOscillator();
+          const vol = ctxAudio.createGain();
+          osc.type = type || "square";
+          osc.frequency.setValueAtTime(freq, at || ctxAudio.currentTime);
+          vol.gain.setValueAtTime(0, at || ctxAudio.currentTime);
+          vol.gain.linearRampToValueAtTime(gain || .18, (at || ctxAudio.currentTime) + .01);
+          vol.gain.exponentialRampToValueAtTime(.001, (at || ctxAudio.currentTime) + dur);
+          osc.connect(vol);
+          vol.connect(master);
+          osc.start(at || ctxAudio.currentTime);
+          osc.stop((at || ctxAudio.currentTime) + dur + .03);
+        }
+
+        return {
+          unlock() {
+            ensure();
+          },
+          playBgm,
+          stopBgm,
+          tick(dt, fearless) {
+            if (bgmStarted && !bgm.paused) return;
+            const ctxAudio = ensure();
+            if (!ctxAudio) return;
+            next -= dt;
+            if (next > 0) return;
+            const bpm = fearless ? 172 : 132;
+            next = 60 / bpm / 2;
+            const base = fearless ? 196 : 147;
+            const pattern = fearless ? [0, 7, 12, 10, 15, 12, 19, 22] : [0, 0, 7, 5, 0, 10, 7, 12];
+            const note = base * Math.pow(2, pattern[beat % pattern.length] / 12);
+            tone(note, fearless ? .08 : .06, "square", fearless ? .07 : .045, ctxAudio.currentTime);
+            if (beat % 4 === 0) tone(55, .05, "triangle", .06, ctxAudio.currentTime);
+            beat++;
+          },
+          jump() { tone(490, .07, "square", .09); tone(735, .05, "square", .06); },
+          throwPad() { tone(980, .05, "square", .07); tone(640, .07, "square", .05); },
+          hit() { tone(105, .1, "sawtooth", .18); tone(720, .1, "square", .13); },
+          dash() { tone(92, .12, "sawtooth", .15); tone(320, .16, "square", .12); },
+          hurt() { tone(76, .24, "sawtooth", .16); },
+          combo(count) {
+            const ctxAudio = ensure();
+            if (!ctxAudio) return;
+            const base = 440 + Math.min(count, 8) * 24;
+            tone(base, .07, "square", .09, ctxAudio.currentTime);
+            tone(base * 1.5, .09, "triangle", .075, ctxAudio.currentTime + .045);
+          },
+          fearless() {
+            tone(392, .12, "square", .13);
+            setTimeout(() => tone(523, .12, "square", .13), 70);
+            setTimeout(() => tone(784, .16, "square", .14), 140);
+          },
+          collect() { tone(860, .05, "square", .08); tone(1180, .06, "square", .07); }
+        };
+      }
+
+      function resetGame() {
+        game = {
+          state: "ready",
+          time: 0,
+          scroll: 0,
+          speed: 250,
+          score: 0,
+          knockedCount: 0,
+          lives: MAX_LIVES,
+          pads: STARTING_PADS,
+          courage: 0,
+          combo: 0,
+          bestCombo: 0,
+          streak: 0,
+          director: ObstacleDirector.create(Math.random),
+          couragePackDirector: CouragePackDirector.create(Math.random, 250),
+          fearless: 0,
+          shake: 0,
+          slow: 0,
+          flash: 0,
+          rewardPulse: 0,
+          dashGhost: 0,
+          fearlessTrail: 0,
+          dayPhase: 0,
+          projectiles: [],
+          obstacles: [],
+          couragePacks: [],
+          particles: [],
+          texts: [],
+          comic: {
+            lastNormalAt: -99,
+            lastHypeAt: -99
+          },
+          decorativeFlyouts: [],
+          decorativeFlyoutTimer: DECORATIVE_FLYOUT_MIN_INTERVAL,
+          speedLines: [],
+          groundSpeedLineTimer: .65,
+          player: {
+            x: 168,
+            y: groundY - 72,
+            w: 38,
+            h: 72,
+            vy: 0,
+            grounded: true,
+            charging: false,
+            charge: 0,
+            dash: 0,
+            invuln: 0,
+            cough: 0,
+            confidence: 0,
+            throwTime: 0,
+            animState: "idle",
+            animStart: 0
+          }
+        };
+        hudCache = Object.create(null);
+        updateHud();
+      }
+
+      function resetOverlays() {
+        hud.shell.classList.remove("is-playing");
+        hud.start.hidden = false;
+        hud.start.style.display = "grid";
+        hud.end.hidden = true;
+        hud.end.style.display = "none";
+        hud.fearless.textContent = "READY";
+        hud.fearless.style.display = "none";
+        hud.combo.style.display = "none";
+        hud.combo.classList.remove("flash");
+      }
+
+      function startGame() {
+        if (!audio) audio = createAudio();
+        audio.unlock();
+        audio.playBgm(true);
+        resetGame();
+        game.state = "playing";
+        hud.shell.classList.add("is-playing");
+        hud.start.hidden = true;
+        hud.start.style.display = "none";
+        hud.end.hidden = true;
+        hud.end.style.display = "none";
+        startDeferredVisualAssets();
+      }
+
+      function endGame() {
+        game.state = "ended";
+        gamepadStartAttackPending = false;
+        if (game.player) game.player.charging = false;
+        hud.shell.classList.remove("is-playing");
+        if (audio) audio.stopBgm();
+        hud.endTitle.textContent = `恭喜你撞飞了 ${game.knockedCount} 个老登`;
+        hud.endStats.textContent = `Score ${Math.floor(game.score)} · Combo ${game.bestCombo}`;
+        hud.end.hidden = false;
+        hud.end.style.display = "grid";
+      }
+
+      function updateHud() {
+        if (hudCache.lives !== game.lives) {
+          hud.lives.innerHTML = Array.from({ length: MAX_LIVES }, (_, index) =>
+            `<span class="pixelHeart${index < game.lives ? "" : " empty"}"></span>`
+          ).join("");
+          hud.lives.setAttribute("aria-label", `${game.lives} 条生命`);
+          hudCache.lives = game.lives;
+        }
+        const score = Math.floor(game.score);
+        if (hudCache.score !== score) {
+          hud.score.textContent = `Score ${score}`;
+          hudCache.score = score;
+        }
+        const padText = game.fearless > 0 ? "∞" : game.pads;
+        if (hudCache.pads !== padText) {
+          hud.pads.innerHTML = `<span class="padIcon"></span><span class="padNumber">×${padText}</span>`;
+          hud.pads.setAttribute("aria-label", `卫生巾数量 ${padText}`);
+          hudCache.pads = padText;
+        }
+        const courage = clamp(game.courage, 0, 100);
+        if (hudCache.courage !== courage) {
+          hud.courage.style.width = `${courage}%`;
+          hudCache.courage = courage;
+        }
+        const rewardText = rewardStatusText();
+        if (hudCache.rewardText !== rewardText) {
+          hud.reward.textContent = rewardText;
+          hudCache.rewardText = rewardText;
+        }
+        const rewardPulse = game.rewardPulse > 0;
+        if (hudCache.rewardPulse !== rewardPulse) {
+          hud.courageWrap.classList.toggle("reward-pulse", rewardPulse);
+          hud.reward.classList.toggle("reward-pulse", rewardPulse);
+          hudCache.rewardPulse = rewardPulse;
+        }
+        const fearlessVisible = game.fearless > 0;
+        const fearlessText = fearlessVisible ? `FEARLESS · 无敌冲撞 ${game.fearless.toFixed(1)}s` : "READY";
+        if (hudCache.fearlessText !== fearlessText) {
+          hud.fearless.textContent = fearlessText;
+          hudCache.fearlessText = fearlessText;
+        }
+        if (hudCache.fearlessVisible !== fearlessVisible) {
+          hud.fearless.style.display = fearlessVisible ? "block" : "none";
+          hudCache.fearlessVisible = fearlessVisible;
+        }
+        let comboVisible = false;
+        let comboText = "";
+        if (game.combo > 1) {
+          comboVisible = true;
+          comboText = comboStatusText();
+        } else if (game.streak > 0 && game.fearless <= 0) {
+          comboVisible = true;
+          comboText = `FEARLESS ${game.streak}/3`;
+        }
+        if (hudCache.comboText !== comboText) {
+          hud.combo.textContent = comboText;
+          hudCache.comboText = comboText;
+        }
+        if (hudCache.comboVisible !== comboVisible) {
+          hud.combo.style.display = comboVisible ? "block" : "none";
+          hudCache.comboVisible = comboVisible;
+        }
+      }
+
+      function flashComboPanel() {
+        if (game.combo <= 1 && game.streak <= 0) return;
+        hud.combo.style.display = "block";
+        hud.combo.textContent = comboStatusText();
+        hud.combo.classList.remove("flash");
+        void hud.combo.offsetWidth;
+        hud.combo.classList.add("flash");
+      }
+
+      function comboStatusText() {
+        const progress = game.fearless > 0 ? "FEARLESS!" : `FEARLESS ${clamp(game.streak, 0, 3)}/3`;
+        return game.combo > 1 ? `COMBO ×${game.combo} · ${progress}` : progress;
+      }
+
+      function rewardStatusText() {
+        if (!game) return "FEARLESS READY";
+        if (game.fearless > 0) return "FEARLESS ACTIVE";
+        if (game.streak > 0) return `FEARLESS ${clamp(game.streak, 0, 3)}/3`;
+        return "FEARLESS READY";
+      }
+
+      function pulseRewardHud() {
+        game.rewardPulse = .34;
+      }
+
+      function loadReducedEffectsPreference() {
+        try {
+          const saved = localStorage.getItem(EFFECTS_STORAGE_KEY);
+          if (saved !== null) return saved === "true";
+        } catch (error) {
+          console.warn("[Settings] Unable to read reduced-effects preference", error);
+        }
+        return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || false;
+      }
+
+      function applyReducedEffects(enabled, persist) {
+        settings.reducedEffects = !!enabled;
+        hud.reduceEffects.checked = settings.reducedEffects;
+        hud.shell.classList.toggle("reduced-effects", settings.reducedEffects);
+        if (game && settings.reducedEffects) {
+          game.decorativeFlyouts.length = 0;
+          game.shake = 0;
+          game.flash = 0;
+        }
+        if (!persist) return;
+        try {
+          localStorage.setItem(EFFECTS_STORAGE_KEY, String(settings.reducedEffects));
+        } catch (error) {
+          console.warn("[Settings] Unable to save reduced-effects preference", error);
+        }
+      }
+
+      function configureDevWarning() {
+        const isFileProtocol = window.location.protocol === "file:";
+        hud.fileWarning.textContent = isFileProtocol ? DEV_WARNING_TEXT : "";
+        hud.fileWarning.hidden = !isFileProtocol;
+      }
+
+      function addCourage(amount) {
+        const gain = game.combo >= 2 ? amount * 2 : amount;
+        game.courage = clamp(game.courage + gain, 0, 100);
+        game.player.confidence = clamp(game.courage / 100, 0, 1);
+        pulseRewardHud();
+      }
+
+      function addScore(amount) {
+        game.score += amount * (1 + Math.min(game.combo, 12) * .08);
+      }
+
+      function requestComicPopup(type, text, x, y) {
+        const rule = comicPopupRules[type];
+        if (!rule || !game || game.state !== "playing") return false;
+        if (Math.random() > rule.chance) return false;
+
+        const now = game.time || 0;
+        if (rule.cooldown === "normal" && now - game.comic.lastNormalAt < NORMAL_POPUP_COOLDOWN) return false;
+        if (rule.cooldown === "hype" && now - game.comic.lastHypeAt < HYPE_POPUP_COOLDOWN) return false;
+
+        const visibleNormal = game.texts.filter(t => t.normal);
+        if (rule.normal && visibleNormal.length >= MAX_NORMAL_POPUPS) {
+          const lowest = visibleNormal.reduce((candidate, item) =>
+            item.priority < candidate.priority ? item : candidate
+          );
+          if (lowest.priority >= rule.priority) return false;
+          game.texts.splice(game.texts.indexOf(lowest), 1);
+        }
+
+        if (!rule.normal && visibleNormal.length >= MAX_NORMAL_POPUPS) {
+          const lowest = visibleNormal.reduce((candidate, item) =>
+            item.priority < candidate.priority ? item : candidate
+          );
+          game.texts.splice(game.texts.indexOf(lowest), 1);
+        }
+
+        const pos = popupPosition(type, x, y);
+        popText(text, pos.x, pos.y, rule.kind, {
+          duration: rule.duration,
+          priority: rule.priority,
+          normal: rule.normal,
+          size: rand(rule.size[0], rule.size[1])
+        });
+        if (rule.cooldown === "normal") game.comic.lastNormalAt = now;
+        if (rule.cooldown === "hype") game.comic.lastHypeAt = now;
+        return true;
+      }
+
+      function popupPosition(type, x, y) {
+        if (type === "hype") return { x: W / 2 - 92, y: 84 };
+        if (type === "fearless") return { x: W / 2 - 132, y: 108 };
+        const p = game.player;
+        let px = x;
+        let py = y - 26;
+        if (px > p.x - 40 && px < p.x + 120) py -= 42;
+        return {
+          x: clamp(px, 38, W - 250),
+          y: clamp(py, 76, groundY - 210)
+        };
+      }
+
+      function popText(text, x, y, kind, options) {
+        const opts = options || {};
+        const duration = opts.duration || .7;
+        game.texts.push({
+          text,
+          x,
+          y,
+          vx: opts.vx == null ? rand(-4, 7) : opts.vx,
+          vy: opts.vy == null ? rand(-28, -18) : opts.vy,
+          life: duration,
+          max: duration,
+          kind: kind || "white",
+          size: opts.size || rand(18, 26),
+          priority: opts.priority || 0,
+          normal: !!opts.normal
+        });
+      }
+
+      function attackImpactFeedback(o, method) {
+        const isDash = method === "dash";
+        game.shake = Math.max(game.shake, isDash ? .32 : .18);
+      }
+
+      function burst(x, y, color, count, force, options) {
+        const opts = options || {};
+        for (let i = 0; i < count; i++) {
+          const life = rand(opts.lifeMin == null ? .26 : opts.lifeMin, opts.lifeMax == null ? .7 : opts.lifeMax);
+          const vx = opts.direction === "left"
+            ? -rand(force * .45, force)
+            : rand(-1, 1) * force + rand(60, 190);
+          game.particles.push({
+            x,
+            y,
+            vx,
+            vy: opts.direction === "left" ? rand(-.45, .25) * force : rand(-1.3, .8) * force,
+            size: rand(opts.sizeMin == null ? 3 : opts.sizeMin, opts.sizeMax == null ? 10 : opts.sizeMax),
+            rot: opts.noRotation ? 0 : rand(0, Math.PI),
+            spin: opts.noRotation ? 0 : rand(-8, 8),
+            color,
+            fx: particleFxForColor(color),
+            life,
+            max: life
+          });
+        }
+      }
+
+      function particleFxForColor(color) {
+        if (color === ART.gold || color === ART.lime) return "starHit";
+        if (color === ART.hot || color === ART.pink) return "bang";
+        if (color === ART.cyan) return "spark";
+        if (color === ART.smoke || color === ART.smokeHi) return "dust";
+        return "landingDust";
+      }
+
+      function spawnSpeedLines(count) {
+        const available = Math.max(0, MAX_GROUND_SPEED_LINES - game.speedLines.length);
+        for (let i = 0; i < Math.min(count, available); i++) {
+          game.speedLines.push({
+            x: rand(W * .36, W + 80),
+            y: rand(groundY + 18, H - 18),
+            w: rand(42, 96),
+            life: rand(.24, .38)
+          });
+        }
+      }
+
+      function spawnDecorativeFlyout() {
+        if (settings.reducedEffects || game.decorativeFlyouts.length >= MAX_DECORATIVE_FLYOUTS) return;
+        const life = rand(.36, .5);
+        game.decorativeFlyouts.push({
+          x: W + 28,
+          y: rand(28, H * .18),
+          w: rand(18, 34),
+          vx: -rand(250, 360),
+          life,
+          max: life,
+          color: Math.random() < .5 ? ART.cyan : ART.paper
+        });
+      }
+
+      function fearlessHitEffect(o) {
+        const count = settings.reducedEffects ? 3 : 6;
+        popText("砰!", clamp(o.x + 4, 260, W - 100), o.y - 16, "attack", {
+          duration: .32,
+          vx: -18,
+          vy: -16,
+          size: 18,
+          priority: 4
+        });
+        burst(o.x + o.w * .45, o.y + o.h * .45, ART.gold, count, settings.reducedEffects ? 90 : 150, {
+          direction: "left",
+          lifeMin: .22,
+          lifeMax: .36,
+          sizeMin: 3,
+          sizeMax: 6,
+          noRotation: true
+        });
+        game.fearlessTrail = Math.max(game.fearlessTrail, settings.reducedEffects ? .1 : .18);
+      }
+
+      function jump() {
+        if (!game || game.state !== "playing") return;
+        if (game.player.grounded || game.player.y > groundY - game.player.h - 10) {
+          game.player.vy = -690;
+          game.player.grounded = false;
+          addCourage(1);
+          game.combo = Math.max(1, game.combo);
+          requestComicPopup("jump", pick(jumpTexts), game.player.x + 32, game.player.y - 32);
+          burst(game.player.x + 18, groundY - 8, ART.paper, 9, 80);
+          if (audio) audio.jump();
+        }
+      }
+
+      function beginCharge() {
+        if (!game || game.state !== "playing") return;
+        game.player.charging = true;
+        game.player.charge = 0;
+      }
+
+      function releaseAttack() {
+        if (!game || game.state !== "playing") return;
+        const p = game.player;
+        const charge = p.charge;
+        p.charging = false;
+        p.charge = 0;
+        if (charge >= .34) {
+          p.dash = clamp(.22 + charge * .22, .25, .62);
+          game.dashGhost = .4;
+          game.shake = Math.max(game.shake, .18);
+          requestComicPopup("charge", pick(chargeTexts), p.x + 58, p.y - 38);
+          burst(p.x + 60, p.y + 40, ART.gold, 16, 210);
+          spawnSpeedLines(4);
+          if (audio) audio.dash();
+        } else {
+          if (game.fearless <= 0 && game.pads <= 0) {
+            popText("没货了！", p.x + 28, p.y - 20, "hurt");
+            return;
+          }
+          if (game.fearless <= 0) game.pads--;
+          game.projectiles.push({
+            x: p.x + 42,
+            y: p.y + 30,
+            w: 26,
+            h: 14,
+            vx: 720 + game.speed * .24,
+            spin: 0,
+            hit: false
+          });
+          p.throwTime = .18;
+          requestComicPopup("attack", "签收！", p.x + 56, p.y - 34);
+          if (audio) audio.throwPad();
+        }
+      }
+
+      function spawnObstacle(type) {
+        const o = {
+          type,
+          x: W + 60,
+          y: 0,
+          w: type === "smoke" ? 58 : type === "harasser" ? 44 : 54,
+          h: type === "smoke" ? 82 : type === "harasser" ? 78 : 84,
+          vx: 0,
+          vy: 0,
+          rot: 0,
+          fly: false,
+          hit: false,
+          scored: false,
+          talk: pick(chatter[type]),
+          talkLife: rand(1.2, 2.4),
+          wobble: rand(0, Math.PI * 2)
+        };
+        o.y = groundY - o.h + (type === "smoke" ? 3 : 0);
+        game.obstacles.push(o);
+      }
+
+      function spawnCouragePack() {
+        game.couragePacks.push({
+          x: W + 64,
+          y: groundY - rand(162, 202),
+          w: 64,
+          h: 64,
+          bob: rand(0, Math.PI * 2),
+          taken: false
+        });
+      }
+
+      function grantFearless(seconds, source, x, y) {
+        const wasActive = game.fearless > 0;
+        game.fearless = FearlessRewardRules.nextDuration(game.fearless, seconds);
+        if (wasActive) ObstacleDirector.extendFearless(game.director);
+        else ObstacleDirector.enterFearless(game.director);
+        game.flash = settings.reducedEffects ? 0 : .24;
+        game.shake = Math.max(game.shake, settings.reducedEffects ? 0 : .16);
+        game.fearlessTrail = settings.reducedEffects ? .1 : .28;
+        game.decorativeFlyoutTimer = DECORATIVE_FLYOUT_MIN_INTERVAL;
+        game.groundSpeedLineTimer = .65;
+        if (!wasActive) {
+          game.streak = 0;
+          game.texts = game.texts.filter(text => text.priority >= 5);
+          requestComicPopup("fearless", "FEARLESS!!", W / 2 - 132, 118);
+          if (audio) audio.fearless();
+        }
+        if (source === "courage-pack") {
+          popText("勇气能量 +5秒", x, y, "charge", {
+            duration: .9,
+            vx: -8,
+            vy: -32,
+            size: 22,
+            priority: 5
+          });
+          burst(x + 26, y + 30, ART.pink, 10, 160);
+          burst(x + 34, y + 24, ART.cyan, 8, 150);
+          if (audio) audio.collect();
+        }
+        spawnSpeedLines(settings.reducedEffects ? 1 : 4);
+      }
+
+      function activateFearless() {
+        grantFearless(FearlessRewardRules.COMBO_SECONDS, "combo");
+      }
+
+      function successfulObstacle(o, method, extraScore) {
+        if (o.scored) return;
+        const wasFearless = game.fearless > 0;
+        o.scored = true;
+        o.hit = true;
+        o.talk = "";
+        game.combo++;
+        game.bestCombo = Math.max(game.bestCombo, game.combo);
+        game.streak++;
+        addScore(extraScore || (method === "jump" ? 10 : method === "dash" ? 28 : 20));
+        addCourage(method === "jump" ? 1 : 2);
+        const activatesFearless = !wasFearless && game.streak >= 3;
+        if (!wasFearless && !activatesFearless && method === "jump") {
+          requestComicPopup("jump", pick(jumpTexts), game.player.x + 36, game.player.y - 34);
+        } else if (!wasFearless && !activatesFearless && method === "dash") {
+          requestComicPopup("charge", pick(chargeTexts), o.x + 8, o.y - 44);
+        } else if (!wasFearless && !activatesFearless) {
+          requestComicPopup("attack", pick(attackTexts), o.x + 8, o.y - 44);
+        }
+        if (!wasFearless && !activatesFearless && game.combo > 1) {
+          requestComicPopup("hype", `COMBO ×${game.combo}`, W / 2 - 92, 92);
+        }
+        flashComboPanel();
+        if (game.combo > 1 && audio) audio.combo(game.combo);
+        if (activatesFearless) activateFearless();
+      }
+
+      function knockObstacle(o, power, method) {
+        if (game.state !== "playing") return;
+        game.knockedCount++;
+        const wasFearless = game.fearless > 0;
+        o.fly = true;
+        o.hit = true;
+        o.talk = "";
+        o.vx = wasFearless ? Math.max(power, rand(900, 1120)) : power;
+        o.vy = wasFearless ? -rand(430, 540) : -rand(230, 430);
+        o.rot = settings.reducedEffects ? 0 : rand(-.18, .18);
+        attackImpactFeedback(o, method);
+        successfulObstacle(o, method, method === "dash" ? Math.floor(28 + Math.abs(power) * .045) : 20);
+        game.shake = Math.max(game.shake, method === "dash" ? .28 : .12);
+        if (wasFearless) fearlessHitEffect(o);
+        if (audio) audio.hit();
+      }
+
+      function hurtBy(o) {
+        if (game.player.invuln > 0 || o.hit || o.fly) return;
+        game.lives--;
+        game.combo = 0;
+        game.streak = 0;
+        ObstacleDirector.onPlayerHurt(game.director, game.time);
+        game.player.invuln = 1.05;
+        game.player.cough = o.type === "smoke" ? .9 : .35;
+        game.slow = o.type === "smoke" ? .85 : .42;
+        game.shake = .2;
+        popText(o.type === "smoke" ? pick(coughTexts) : "哎呀！", game.player.x + 22, game.player.y - 24, "hurt");
+        burst(game.player.x + 30, game.player.y + 42, ART.smokeHi, 16, 140);
+        if (audio) audio.hurt();
+        if (game.lives <= 0) endGame();
+      }
+
+      function update(dt) {
+        if (!game) resetGame();
+        if (game.state !== "playing") {
+          game.time += dt;
+          draw();
+          return;
+        }
+
+        game.time += dt;
+        const fearlessOn = game.fearless > 0;
+        if (audio) audio.tick(dt, fearlessOn);
+
+        game.dayPhase = (game.time % 180) / 180;
+        const targetSpeed = ObstacleDirector.speedAt(game.time) + (fearlessOn ? 150 : 0);
+        const slowFactor = game.slow > 0 ? .72 : 1;
+        game.speed += (targetSpeed - game.speed) * Math.min(1, dt * 1.8);
+        const move = game.speed * slowFactor;
+        game.scroll += move * dt;
+
+        if (game.fearless > 0) {
+          game.fearless = Math.max(0, game.fearless - dt);
+          game.decorativeFlyoutTimer -= dt;
+          if (game.decorativeFlyoutTimer <= 0) {
+            spawnDecorativeFlyout();
+            game.decorativeFlyoutTimer = rand(DECORATIVE_FLYOUT_MIN_INTERVAL, 1.28);
+          }
+          game.groundSpeedLineTimer -= dt;
+          if (game.groundSpeedLineTimer <= 0) {
+            spawnSpeedLines(1);
+            game.groundSpeedLineTimer = .65;
+          }
+        }
+        game.shake = Math.max(0, game.shake - dt);
+        game.slow = Math.max(0, game.slow - dt);
+        game.flash = Math.max(0, game.flash - dt);
+        game.rewardPulse = Math.max(0, game.rewardPulse - dt);
+        game.dashGhost = Math.max(0, game.dashGhost - dt);
+        game.fearlessTrail = Math.max(0, game.fearlessTrail - dt);
+
+        const p = game.player;
+        if (p.charging) p.charge = clamp(p.charge + dt, 0, 1.25);
+        p.invuln = Math.max(0, p.invuln - dt);
+        p.cough = Math.max(0, p.cough - dt);
+        p.dash = Math.max(0, p.dash - dt);
+        p.throwTime = Math.max(0, p.throwTime - dt);
+        if (!p.grounded) {
+          p.vy += 1880 * dt;
+          p.y += p.vy * dt;
+          if (p.y >= groundY - p.h) {
+            p.y = groundY - p.h;
+            p.vy = 0;
+            p.grounded = true;
+          }
+        }
+
+        const unresolvedCount = game.obstacles.reduce((count, obstacle) =>
+          count + (!obstacle.hit && !obstacle.fly ? 1 : 0), 0
+        );
+        const spawnEvent = ObstacleDirector.advance(game.director, {
+          dt,
+          distance: move * dt,
+          time: game.time,
+          fearlessRemaining: game.fearless,
+          unresolvedCount
+        });
+        if (spawnEvent) spawnObstacle(spawnEvent.type);
+
+        const packDue = CouragePackDirector.advance(game.couragePackDirector, {
+          time: game.time,
+          distance: move * dt,
+          speed: move,
+          safeToSpawn: !spawnEvent && unresolvedCount < 2 && p.invuln <= 0 && p.cough <= 0 && game.slow <= 0,
+          hasPack: game.couragePacks.length > 0
+        });
+        if (packDue) spawnCouragePack();
+
+        for (const pr of game.projectiles) {
+          pr.x += pr.vx * dt;
+          pr.spin += dt * 18;
+        }
+        game.projectiles = game.projectiles.filter(pr => pr.x < W + 90 && !pr.hit);
+
+        const playerBox = playerHitbox();
+        for (const pack of game.couragePacks) {
+          pack.x -= move * dt;
+          pack.bob += dt * 5.5;
+          const box = { x: pack.x, y: pack.y + Math.sin(pack.bob) * 6, w: pack.w, h: pack.h };
+          if (!pack.taken && rectsHit(playerBox, box)) {
+            pack.taken = true;
+            addScore(5);
+            grantFearless(FearlessRewardRules.COURAGE_PACK_SECONDS, "courage-pack", pack.x - 70, pack.y - 20);
+          }
+        }
+        game.couragePacks = game.couragePacks.filter(pack => pack.x > -96 && !pack.taken);
+
+        for (const o of game.obstacles) {
+          if (o.fly) {
+            o.x += o.vx * dt;
+            o.y += o.vy * dt;
+            o.vy += 920 * dt;
+            o.rot += settings.reducedEffects ? 0 : dt * 3.2;
+          } else {
+            o.x -= move * dt;
+            o.wobble += dt * (o.type === "drunk" ? 7 : 3);
+            if (o.type === "drunk") o.x += Math.sin(o.wobble) * 34 * dt;
+            o.talkLife -= dt;
+            if (o.type === "smoke" && !o.scored && o.x + o.w < p.x && p.y + p.h < groundY - 22) {
+              successfulObstacle(o, "jump", 10);
+            }
+          }
+
+          const obstacleBox = obstacleHitbox(o);
+          for (const pr of game.projectiles) {
+            if (!pr.hit && !o.hit && o.type !== "smoke" && rectsHit(pr, obstacleBox)) {
+              pr.hit = true;
+              knockObstacle(o, rand(520, 760), "attack");
+            }
+          }
+
+          if (!o.hit && rectsHit(playerBox, obstacleBox)) {
+            if (fearlessOn || p.dash > 0) {
+              const method = o.type === "drunk" || p.dash > 0 ? "dash" : "attack";
+              knockObstacle(o, rand(650, 980) + (p.charge * 220), method);
+            } else {
+              hurtBy(o);
+            }
+          }
+        }
+        game.obstacles = game.obstacles.filter(o => o.x > -180 && o.y < H + 220);
+
+        updateParticles(dt);
+        updateHud();
+        draw();
+      }
+
+      function updateParticles(dt) {
+        for (const particle of game.particles) {
+          particle.x += particle.vx * dt;
+          particle.y += particle.vy * dt;
+          particle.vy += 520 * dt;
+          if (!settings.reducedEffects) particle.rot += particle.spin * dt;
+          particle.life -= dt;
+        }
+        game.particles = game.particles.filter(p => p.life > 0);
+
+        for (const text of game.texts) {
+          text.x += text.vx * dt;
+          text.y += text.vy * dt;
+          text.vy += 46 * dt;
+          text.life -= dt;
+        }
+        game.texts = game.texts.filter(t => t.life > 0);
+
+        for (const line of game.speedLines) {
+          line.x -= (game.speed * 2.7) * dt;
+          line.life -= dt;
+        }
+        game.speedLines = game.speedLines.filter(l => l.life > 0 && l.x + l.w > -30);
+
+        for (const flyout of game.decorativeFlyouts) {
+          flyout.x += flyout.vx * dt;
+          flyout.life -= dt;
+        }
+        game.decorativeFlyouts = game.decorativeFlyouts.filter(f => f.life > 0 && f.x + f.w > -20);
+      }
+
+      function playerHitbox() {
+        const p = game.player;
+        return { x: p.x + 7, y: p.y + 8, w: p.w - 12 + (p.dash > 0 ? 30 : 0), h: p.h - 10 };
+      }
+
+      function obstacleHitbox(o) {
+        if (o.type === "smoke") return { x: o.x + 8, y: o.y + 10, w: o.w - 18, h: o.h - 8 };
+        if (o.type === "harasser") return { x: o.x + 4, y: o.y + 4, w: o.w - 5, h: o.h - 3 };
+        return { x: o.x + 5, y: o.y + 5, w: o.w - 9, h: o.h - 4 };
+      }
+
+      function activePalette() {
+        const night = game ? (Math.sin(game.dayPhase * Math.PI * 2 - Math.PI / 2) + 1) / 2 : 0;
+        return night > .5 ? palettes.night : palettes.day;
+      }
+
+      function draw() {
+        if (!game) return;
+        const shakeScale = settings.reducedEffects ? 0 : .4;
+        const shakeX = game.shake > 0 ? rand(-8, 8) * (game.shake / .28) * shakeScale : 0;
+        const shakeY = game.shake > 0 ? rand(-5, 5) * (game.shake / .28) * shakeScale : 0;
+        ctx.save();
+        ctx.translate(shakeX | 0, shakeY | 0);
+        drawBackground();
+        drawDecorativeFlyouts();
+        drawRoad();
+        drawSpeedLines();
+        drawCouragePacks();
+        drawProjectiles();
+        drawObstacles();
+        drawPlayer();
+        drawParticles();
+        drawTexts();
+        ctx.restore();
+
+        if (game.flash > 0 && !settings.reducedEffects) {
+          ctx.fillStyle = `rgba(239,45,88,${game.flash * .14})`;
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        if (game.player.charging && game.state === "playing") {
+          drawChargeMeter();
+        }
+      }
+
+      function drawBackground() {
+        const p = activePalette();
+        const bgName = p === palettes.night ? "night" : "day";
+        const bg = getVisualImage("background", bgName);
+        if (bg) {
+          drawPanoramaBackground(bg);
+          return;
+        }
+
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, p.skyTop);
+        grad.addColorStop(.58, p.skyBottom);
+        grad.addColorStop(.58, p.near);
+        grad.addColorStop(1, p.road);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        const sunX = W - ((game.time * 18) % (W + 180));
+        const night = p === palettes.night;
+        ctx.fillStyle = night ? ART.paper : ART.gold;
+        pixelCircle(sunX, 72, night ? 22 : 30, 5);
+
+        drawClouds(p);
+        drawSkylineLayer(.12, 250, p.back, 84, true);
+        drawCantonTower(700 - (game.scroll * .1 % 1180), 244, p.mid, p.neon);
+        drawSkylineLayer(.25, 316, p.mid, 126, true);
+        rect(0, 286, W, 42, night ? "rgba(36,216,255,.10)" : "rgba(255,232,184,.18)");
+        drawQilouLayer(p);
+        drawTrafficProps(p);
+      }
+
+      function drawPanoramaBackground(image) {
+        const scale = Math.max(H / image.height, W / image.width);
+        const dw = image.width * scale;
+        const dh = image.height * scale;
+        const offset = (game.scroll * .16) % dw;
+        const y = H - dh;
+        for (let x = -offset - dw; x < W + dw; x += dw) {
+          ctx.drawImage(image, x, y, dw, dh);
+        }
+        rect(0, groundY - 8, W, 10, "rgba(7,8,15,.36)");
+      }
+
+      function drawClouds(p) {
+        const night = p === palettes.night;
+        if (night) {
+          for (let i = 0; i < 38; i++) {
+            const x = ((i * 157 - game.scroll * .05) % (W + 120)) - 60;
+            const y = 28 + ((i * 43) % 120);
+            ctx.fillStyle = i % 3 === 0 ? ART.paper : ART.cyan;
+            ctx.fillRect(x | 0, y | 0, 3, 3);
+          }
+          return;
+        }
+        for (let i = 0; i < 7; i++) {
+          const x = ((i * 190 - game.scroll * .09) % (W + 220)) - 110;
+          const y = 42 + (i % 3) * 34;
+          rect(x, y, 66, 18, "rgba(255,247,220,.82)");
+          rect(x + 20, y - 10, 48, 22, "rgba(255,247,220,.82)");
+          rect(x + 58, y + 4, 38, 14, "rgba(255,247,220,.82)");
+        }
+      }
+
+      function drawSkylineLayer(rate, baseY, color, height, detailed) {
+        const offset = game.scroll * rate;
+        ctx.save();
+        ctx.globalAlpha = rate < .2 ? .72 : .82;
+        for (let i = -1; i < 11; i++) {
+          const x = i * 110 - (offset % 110);
+          const h = height + ((i * 41) % 64);
+          const w = 82 + ((i * 17) % 40);
+          rect(x, baseY - h, w, h, color);
+          rect(x, baseY - h - 4, w, 4, "rgba(7,8,15,.42)");
+          if (detailed) {
+            for (let wx = 12; wx < w - 8; wx += 21) {
+              for (let wy = 18; wy < h - 12; wy += 23) {
+                if ((wx + wy + i) % 3 !== 0) rect(x + wx, baseY - h + wy, 8, 9, "rgba(255,211,90,.48)");
+              }
+            }
+            if (i % 3 === 0) rect(x + w - 10, baseY - h - 34, 4, 34, "rgba(239,45,88,.44)");
+          }
+        }
+        ctx.restore();
+      }
+
+      function drawCantonTower(x, baseY, color, neon) {
+        for (let k = -1; k < 3; k++) {
+          const tx = x + k * 1180;
+          if (tx < -120 || tx > W + 120) continue;
+          ctx.save();
+          ctx.globalAlpha = .9;
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 7;
+          ctx.beginPath();
+          ctx.moveTo(tx + 34, baseY);
+          ctx.bezierCurveTo(tx + 84, baseY - 72, tx + 0, baseY - 145, tx + 52, baseY - 230);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(tx + 82, baseY);
+          ctx.bezierCurveTo(tx + 30, baseY - 72, tx + 112, baseY - 145, tx + 58, baseY - 230);
+          ctx.stroke();
+          ctx.strokeStyle = neon;
+          ctx.lineWidth = 3;
+          for (let y = baseY - 205; y < baseY - 20; y += 28) {
+            ctx.beginPath();
+            ctx.moveTo(tx + 28, y);
+            ctx.lineTo(tx + 88, y + 2);
+            ctx.stroke();
+          }
+          rect(tx + 48, baseY - 255, 14, 38, neon);
+          ctx.restore();
+        }
+      }
+
+      function drawQilouLayer(p) {
+        const offset = game.scroll * .62;
+        const night = p === palettes.night;
+        ctx.save();
+        ctx.globalAlpha = .88;
+        for (let i = -1; i < 9; i++) {
+          const x = i * 158 - (offset % 158);
+          const h = 82 + (i % 2) * 18;
+          const wall = i % 2 ? (night ? "#1b2748" : "#597a91") : (night ? "#232a4a" : "#6b8796");
+          rect(x, groundY - h - 4, 140, h, wall);
+          rect(x, groundY - h - 8, 140, 8, ART.ink2);
+          rect(x + 8, groundY - h + 10, 122, 18, i % 3 === 0 ? p.sign : "#263d58");
+          drawPixelText(x + 18, groundY - h + 14, i % 3 === 0 ? "广州" : i % 3 === 1 ? "骑楼" : "便利", 10, ART.paper, ART.ink);
+          for (let wx = 15; wx < 118; wx += 34) {
+            rect(x + wx, groundY - h + 42, 20, 28, ART.ink2);
+            rect(x + wx + 4, groundY - h + 46, 12, 18, p.window);
+          }
+          for (let c = 13; c < 132; c += 38) {
+            rect(x + c, groundY - 32, 11, 32, ART.ink);
+            rect(x + c + 2, groundY - 30, 3, 26, "rgba(255,232,184,.12)");
+          }
+        }
+        ctx.restore();
+      }
+
+      function drawTrafficProps(p) {
+        const offset = game.scroll * .85;
+        for (let i = -1; i < 10; i++) {
+          const x = i * 220 - (offset % 220);
+          rect(x + 32, groundY - 98, 10, 78, ART.ink);
+          rect(x + 22, groundY - 114, 30, 22, ART.ink);
+          rect(x + 28, groundY - 109, 7, 7, i % 3 === 0 ? ART.hot : ART.panel2);
+          rect(x + 39, groundY - 109, 7, 7, i % 3 === 1 ? ART.lime : ART.panel2);
+          rect(x + 126, groundY - 72, 76, 42, ART.ink);
+          rect(x + 132, groundY - 66, 64, 22, "rgba(45,226,255,.76)");
+          rect(x + 136, groundY - 40, 12, 10, ART.hot);
+          rect(x + 176, groundY - 40, 12, 10, ART.hot);
+          rect(x + 128, groundY - 26, 72, 6, p.neon);
+        }
+      }
+
+      function drawRoad() {
+        const p = activePalette();
+        rect(0, groundY, W, H - groundY, p.road);
+        rect(0, groundY, W, 10, ART.ink);
+        for (let x = -120; x < W + 120; x += 86) {
+          const xx = x - (game.scroll * 1.2 % 86);
+          rect(xx, groundY + 64, 44, 7, p.line);
+        }
+        for (let x = -160; x < W + 160; x += 186) {
+          const xx = x - (game.scroll * 1.05 % 186);
+          for (let s = 0; s < 5; s++) {
+            rect(xx + s * 22, groundY + 20, 15, 54, "rgba(255,247,220,.82)");
+          }
+        }
+        rect(0, groundY - 8, W, 8, ART.ink);
+        rect(0, groundY - 15, W, 5, p.neon);
+        rect(0, groundY - 20, W, 4, "rgba(255,232,184,.36)");
+      }
+
+      function drawSpeedLines() {
+        if (game.fearless <= 0 && game.player.dash <= 0) return;
+        ctx.globalAlpha = game.fearless > 0 ? .2 : .28;
+        for (const line of game.speedLines) {
+          const sprite = getSprite("fx", "speedLine");
+          const frame = spriteFrame(sprite, 18, line.x * .01);
+          if (!drawSpriteFrame(sprite, frame, line.x, line.y - 13, line.w, 32)) {
+            ctx.fillStyle = line.life > .18 ? ART.paper : ART.cyan;
+            ctx.fillRect(line.x | 0, line.y | 0, line.w | 0, 4);
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawDecorativeFlyouts() {
+        if (settings.reducedEffects) return;
+        ctx.save();
+        for (const flyout of game.decorativeFlyouts) {
+          const alpha = clamp(flyout.life / flyout.max, 0, 1) * .24;
+          ctx.globalAlpha = alpha;
+          rect(flyout.x, flyout.y, flyout.w, 2, flyout.color);
+          rect(flyout.x + flyout.w + 4, flyout.y - 1, 3, 4, flyout.color);
+        }
+        ctx.restore();
+      }
+
+      function drawCouragePacks() {
+        for (const pack of game.couragePacks) {
+          const y = pack.y + Math.sin(pack.bob) * 6;
+          const glow = getSprite("fx", "spark");
+          const glowFrame = spriteFrame(glow, 14, pack.bob);
+          drawSpriteCentered("fx", "spark", glowFrame, pack.x + pack.w / 2, y + pack.h / 2, 78, { alpha: .3 });
+          if (!drawSpriteCentered("items", "courageEnergyPack", 0, pack.x + pack.w / 2, y + pack.h / 2, 64, { smooth: false })) {
+            rect(pack.x, y, pack.w, pack.h, ART.pink);
+          }
+        }
+      }
+
+      function drawProjectiles() {
+        for (const pr of game.projectiles) {
+          const sprite = getSprite("items", "padSpin");
+          const rotation = settings.reducedEffects || game.fearless > 0 ? 0 : pr.spin;
+          const frame = settings.reducedEffects || game.fearless > 0 ? 0 : spriteFrame(sprite, 22, pr.spin * .03);
+          if (!drawSpriteCentered("items", "padSpin", frame, pr.x + pr.w / 2, pr.y + pr.h / 2, 40, { rotation, smooth: true })) {
+            ctx.save();
+            ctx.translate(pr.x + pr.w / 2, pr.y + pr.h / 2);
+            ctx.rotate(rotation);
+            rect(-13, -7, 26, 14, ART.pink);
+            ctx.restore();
+          }
+        }
+      }
+
+      function drawObstacles() {
+        for (const o of game.obstacles) {
+          ctx.save();
+          ctx.translate(o.x + o.w / 2, o.y + o.h / 2);
+          if (o.fly) ctx.rotate(o.rot);
+          ctx.translate(-o.w / 2, -o.h / 2);
+          if (o.type === "smoke") drawSmoke(o);
+          if (o.type === "harasser") drawHarasser(o);
+          if (o.type === "drunk") drawDrunk(o);
+          ctx.restore();
+
+          if (!o.hit && o.talk && o.talkLife > 0 && o.x > 230 && o.x < W - 80) {
+            drawSpeech(o.talk, o.x - 22, o.y - 38);
+          }
+        }
+      }
+
+      function drawSmoke(o) {
+        const state = Math.sin(o.wobble) > -.25 ? "smokeExhale" : "smokeIdle";
+        const sprite = getSprite("obstacles", state);
+        const frame = spriteFrame(sprite, 7, o.wobble * .08);
+        drawSpriteOnBaselineHeight("obstacles", state, frame, o.w / 2 + 2, o.h + 2, 118);
+
+        const smoke = getSprite("obstacles", "smokeLoop");
+        const smokeFrame = spriteFrame(smoke, 8, o.wobble * .05);
+        drawSpriteFrame(smoke, smokeFrame, o.w * .05, -24, 136, 136, { alpha: .42 });
+      }
+
+      function drawHarasser(o) {
+        const nearPlayer = o.x < game.player.x + 150 && o.x > game.player.x - 20;
+        const state = o.fly || o.hit ? "harasserKnockback" : nearPlayer ? "harasserReach" : "harasserIdle";
+        const sprite = getSprite("obstacles", state);
+        const fps = state === "harasserKnockback" ? 14 : 8;
+        drawSpriteOnBaselineHeight("obstacles", state, spriteFrame(sprite, fps, o.wobble * .06), o.w / 2 + 7, o.h + 2, 112);
+      }
+
+      function drawDrunk(o) {
+        const state = o.fly || o.hit ? "drunkManTumble" : "drunkManSway";
+        const sprite = getSprite("obstacles", state);
+        const fps = state === "drunkManTumble" ? 14 : 9;
+        drawSpriteOnBaselineHeight("obstacles", state, spriteFrame(sprite, fps, o.wobble * .05), o.w / 2 + 3, o.h + 2, 116);
+      }
+
+      function drawPlayer() {
+        const p = game.player;
+        const fearlessOn = game.fearless > 0;
+        const frame = Math.floor(game.time * (fearlessOn ? 17 : 12)) % 4;
+        const bob = p.grounded ? [0, -2, 0, 2][frame] : -3;
+        const lean = p.dash > 0 ? 11 : p.charging ? -4 : fearlessOn ? 5 : 0;
+        const glow = fearlessOn || p.invuln > 0;
+
+        if (fearlessOn) drawFearlessMarker(p);
+
+        if (game.dashGhost > 0 || game.fearlessTrail > 0) {
+          const trailCount = fearlessOn ? (settings.reducedEffects ? 1 : 2) : 4;
+          for (let i = trailCount; i >= 1; i--) {
+            ctx.globalAlpha = (fearlessOn ? .16 : .12) * (1 - i * .13);
+            drawPlayerBody(p.x - i * 22, p.y + bob, frame, lean, true);
+          }
+          ctx.globalAlpha = 1;
+        }
+
+        if (glow) {
+          const glowSprite = getSprite("fx", "fearlessGlow");
+          const glowFrame = settings.reducedEffects ? 0 : spriteFrame(glowSprite, 12);
+          const fearlessGlowAlpha = settings.reducedEffects ? .24 : .42;
+          drawSpriteCentered("fx", "fearlessGlow", glowFrame, p.x + 26, p.y + 42, fearlessOn ? 112 : 88, { alpha: fearlessOn ? fearlessGlowAlpha : .32 });
+        }
+        drawPlayerBody(p.x, p.y + bob + (p.cough > 0 ? Math.sin(game.time * 45) * 2 : 0), frame, lean, false);
+      }
+
+      function drawFearlessMarker(p) {
+        const y = p.y + p.h + 8;
+        ctx.save();
+        ctx.globalAlpha = settings.reducedEffects ? .38 : .52;
+        ctx.fillStyle = ART.cyan;
+        ctx.fillRect(p.x - 8, y + 3, 48, 3);
+        ctx.fillStyle = ART.gold;
+        ctx.fillRect(p.x + 2, y + 8, 34, 3);
+        tri(p.x + 40, y, p.x + 51, y + 5, p.x + 40, y + 10, ART.cyan);
+        ctx.restore();
+      }
+
+      function drawPlayerBody(x, y, frame, lean, ghost) {
+        const fearlessOn = game.fearless > 0;
+        const p = game.player;
+        const state = playerSpriteState();
+        const sprite = getSprite("player", state);
+        const fps = state === "run" || state === "fearlessRun" ? (fearlessOn ? 17 : 12) :
+          state === "dash" ? 18 :
+          state === "charge" ? 10 :
+          state === "throw" ? 18 :
+          state === "hurt" ? 9 : 6;
+        if (p.animState !== state) {
+          p.animState = state;
+          p.animStart = game.time;
+        }
+        const frameIndex = spriteFrame(sprite, fps, -p.animStart);
+        const centerX = x + p.w / 2 + 8 + lean * .25;
+        const baseline = y + p.h + 8;
+        const targetHeight = state === "run" || state === "idle" ? 92 :
+          state === "fearlessRun" ? 164 :
+          state === "jump" || state === "fall" || state === "hurt" ? 116 : 112;
+        const hurtFlicker = !settings.reducedEffects && p.invuln > 0 && Math.floor(game.time * 10) % 2 === 0;
+        const alpha = ghost ? .32 : (hurtFlicker ? .72 : 1);
+        drawSpriteOnBaselineHeight("player", state, frameIndex, centerX, baseline, targetHeight, {
+          alpha,
+          shadowColor: fearlessOn && !ghost ? "rgba(36,216,255,.78)" : null,
+          shadowBlur: settings.reducedEffects ? 5 : 9
+        });
+
+        if (p.charging && !ghost) {
+          const charge = clamp(p.charge / .8, 0, 1);
+          const glow = getSprite("fx", "fearlessGlow");
+          const glowFrame = settings.reducedEffects ? 0 : spriteFrame(glow, 12);
+          drawSpriteCentered("fx", "fearlessGlow", glowFrame, x + 26, y + 42, 86 + charge * 46, { alpha: .24 + charge * .34 });
+        }
+      }
+
+      function playerSpriteState() {
+        const p = game.player;
+        if (p.invuln > 0 && p.cough > 0) return "hurt";
+        if (p.dash > 0) return "dash";
+        if (p.charging) return "charge";
+        if (p.throwTime > 0) return "throw";
+        if (!p.grounded) return p.vy < 0 ? "jump" : "fall";
+        if (game.fearless > 0) return "fearlessRun";
+        return game.state === "playing" ? "run" : "idle";
+      }
+
+      function drawParticles() {
+        for (const p of game.particles) {
+          const alpha = clamp(p.life / p.max, 0, 1);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(settings.reducedEffects ? 0 : p.rot);
+          const sprite = getSprite("fx", p.fx);
+          const frame = sprite ? Math.min(sprite.frames - 1, Math.floor((1 - alpha) * sprite.frames)) : 0;
+          if (!drawSpriteFrame(sprite, frame, -p.size * 2, -p.size * 2, p.size * 4, p.size * 4)) {
+            rect(-p.size / 2, -p.size / 2, p.size, p.size, p.color);
+          }
+          ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawTexts() {
+        for (const t of game.texts) {
+          const age = t.max - t.life;
+          const fadeWindow = Math.min(.26, t.max * .45);
+          const fadeIn = clamp(age / .1, 0, 1);
+          const fadeOut = clamp(t.life / fadeWindow, 0, 1);
+          const alpha = Math.min(fadeIn, fadeOut);
+          const color = t.kind === "attack" ? ART.pink : t.kind === "charge" ? ART.gold : t.kind === "fearless" ? ART.cyan : t.kind === "hurt" ? ART.white : ART.paper;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.translate(t.x, t.y);
+          const fx = t.kind === "charge" ? "boom" :
+            t.kind === "attack" ? "bang" :
+            t.kind === "fearless" ? "comicPop" :
+            t.kind === "hurt" ? "ko" : "starHit";
+          const sprite = getSprite("fx", fx);
+          const frame = sprite ? Math.min(sprite.frames - 1, Math.floor((1 - alpha) * sprite.frames)) : 0;
+          drawSpriteFrame(sprite, frame, -20, -18, Math.max(76, t.text.length * t.size * .72), 70, { alpha: t.kind === "fearless" ? .4 : .58 });
+          comicLabel(t.text, 0, 0, t.size, color);
+          ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawChargeMeter() {
+        const p = game.player;
+        const pct = clamp(p.charge / .8, 0, 1);
+        const x = p.x - 10;
+        const y = p.y - 24;
+        rect(x, y, 88, 14, ART.ink);
+        rect(x + 4, y + 4, 80 * pct, 6, pct > .7 ? ART.lime : ART.gold);
+        comicLabel(pct >= .7 ? "松手！" : "蓄力", x + 8, y - 20, 16, ART.gold);
+      }
+
+      function drawSpeech(text, x, y) {
+        const width = Math.max(90, text.length * 14);
+        rect(x, y, width, 28, ART.ink);
+        rect(x + 4, y + 4, width - 8, 20, ART.paper);
+        rect(x + 8, y + 8, width - 16, 4, ART.white);
+        tri(x + 20, y + 27, x + 34, y + 27, x + 24, y + 39, ART.ink);
+        tri(x + 22, y + 27, x + 32, y + 27, x + 25, y + 35, ART.paper);
+        ctx.font = "900 15px 'Arial Black','PingFang SC',sans-serif";
+        ctx.textBaseline = "top";
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = ART.ink;
+        ctx.fillStyle = ART.ink;
+        ctx.fillText(text, x + 9, y + 6);
+      }
+
+      function comicLabel(text, x, y, size, color) {
+        ctx.font = `900 ${size}px 'Arial Black','PingFang SC','Microsoft YaHei',sans-serif`;
+        ctx.textBaseline = "top";
+        const metrics = ctx.measureText(text);
+        const w = metrics.width + 18;
+        rect(x - 8, y - 5, w, size + 12, ART.ink);
+        rect(x - 12, y - 9, w, 5, ART.paper);
+        rect(x - 8, y + size + 5, w - 6, 3, ART.hot);
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = ART.ink;
+        ctx.strokeText(text, x, y);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = ART.paper;
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = color;
+        ctx.fillText(text, x, y);
+      }
+
+      function drawPixelText(x, y, text, size, color, shadow) {
+        ctx.font = `900 ${size}px 'Arial Black','PingFang SC',sans-serif`;
+        ctx.textBaseline = "top";
+        if (shadow) {
+          ctx.fillStyle = shadow;
+          ctx.fillText(text, x + 2, y + 2);
+        }
+        ctx.fillStyle = color;
+        ctx.fillText(text, x, y);
+      }
+
+      function rect(x, y, w, h, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      }
+
+      function tri(x1, y1, x2, y2, x3, y3, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y3);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function pixelCircle(x, y, r, step, color) {
+        if (color) ctx.fillStyle = color;
+        for (let yy = -r; yy <= r; yy += step) {
+          for (let xx = -r; xx <= r; xx += step) {
+            if (xx * xx + yy * yy <= r * r) {
+              ctx.fillRect(Math.round(x + xx), Math.round(y + yy), step, step);
+            }
+          }
+        }
+      }
+
+      function loop(ts) {
+        const dt = Math.min(.033, (ts - lastTime) / 1000 || .016);
+        lastTime = ts;
+        pollGamepad();
+        update(dt);
+        requestAnimationFrame(loop);
+      }
+
+      function setGamepadStatus(text, connected) {
+        if (hudCache.gamepadStatus !== text) {
+          hud.gamepadStatus.textContent = text;
+          hudCache.gamepadStatus = text;
+        }
+        if (hudCache.gamepadConnected !== connected) {
+          hud.gamepadStatus.classList.toggle("is-connected", connected);
+          hudCache.gamepadConnected = connected;
+        }
+      }
+
+      function cancelGamepadCharge(resetInput) {
+        gamepadStartAttackPending = false;
+        if (game && game.player) {
+          game.player.charging = false;
+          game.player.charge = 0;
+        }
+        if (resetInput) GamepadInput.reset(gamepadInputState);
+      }
+
+      function pollGamepad() {
+        if (typeof navigator.getGamepads !== "function") {
+          setGamepadStatus("当前浏览器不支持手柄 · 可使用键盘或触控", false);
+          return;
+        }
+
+        let action;
+        try {
+          action = GamepadInput.sample(gamepadInputState, navigator.getGamepads());
+        } catch (error) {
+          setGamepadStatus("手柄读取失败 · 可使用键盘或触控", false);
+          return;
+        }
+
+        if (action.connected) setGamepadStatus("Xbox 手柄已连接", true);
+        else if (action.unsupported) setGamepadStatus("当前手柄映射不受支持 · 可使用键盘或触控", false);
+        else setGamepadStatus("手柄未检测 · 请按任意手柄键", false);
+
+        if (action.cancelCharge) cancelGamepadCharge(false);
+
+        if (action.menu && game && game.state !== "playing") {
+          gamepadStartAttackPending = false;
+          startGame();
+        }
+
+        if (action.jump) {
+          if (game && game.state !== "playing") startGame();
+          jump();
+        }
+
+        if (action.attackPressed) {
+          if (game && game.state !== "playing") {
+            gamepadStartAttackPending = true;
+            startGame();
+          } else if (game && game.state === "playing" && !game.player.charging) {
+            beginCharge();
+          }
+        }
+
+        if (action.attackReleased) {
+          if (gamepadStartAttackPending) gamepadStartAttackPending = false;
+          else releaseAttack();
+        }
+      }
+
+      window.addEventListener("keydown", (e) => {
+        if (e.code === "ArrowUp" || e.key === "ArrowUp") {
+          e.preventDefault();
+          if (game && game.state === "ready") startGame();
+          jump();
+        }
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (game && game.state === "ready") {
+            keyboardStartAttackPending = true;
+            startGame();
+            return;
+          }
+          if (keyboardStartAttackPending) return;
+          if (game && game.state === "playing" && !game.player.charging) beginCharge();
+        }
+        if (e.key === "Enter" && game && game.state !== "playing") {
+          e.preventDefault();
+          startGame();
+        }
+      });
+
+      window.addEventListener("keyup", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (keyboardStartAttackPending) {
+            keyboardStartAttackPending = false;
+            return;
+          }
+          releaseAttack();
+        }
+      });
+
+      hud.startButton.addEventListener("click", startGame);
+      hud.restartButton.addEventListener("click", startGame);
+      hud.reduceEffects.addEventListener("change", () => {
+        applyReducedEffects(hud.reduceEffects.checked, true);
+      });
+      hud.touchJump.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        if (game && game.state === "ready") startGame();
+        jump();
+      });
+      hud.touchAttack.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        hud.touchAttack.setPointerCapture?.(e.pointerId);
+        if (game && game.state === "ready") {
+          touchStartAttackPointers.add(e.pointerId);
+          startGame();
+          return;
+        }
+        beginCharge();
+      });
+      hud.touchAttack.addEventListener("pointerup", (e) => {
+        e.preventDefault();
+        hud.touchAttack.releasePointerCapture?.(e.pointerId);
+        if (touchStartAttackPointers.delete(e.pointerId)) return;
+        releaseAttack();
+      });
+      hud.touchAttack.addEventListener("pointercancel", (e) => {
+        e.preventDefault();
+        if (touchStartAttackPointers.delete(e.pointerId)) return;
+        releaseAttack();
+      });
+      hud.touchAttack.addEventListener("contextmenu", (e) => e.preventDefault());
+      hud.touchJump.addEventListener("contextmenu", (e) => e.preventDefault());
+      window.addEventListener("blur", () => {
+        keyboardStartAttackPending = false;
+        touchStartAttackPointers.clear();
+        cancelGamepadCharge(true);
+      });
+
+      resetGame();
+      resetOverlays();
+      applyReducedEffects(settings.reducedEffects, false);
+      configureDevWarning();
+      loadVisualAssetPhase("core").catch(error => {
+        visualAssets.error = error;
+        console.warn("Core visual assets failed to load", error);
+      });
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>

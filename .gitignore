@@ -1,0 +1,13 @@
+.DS_Store
+.playwright-cli/
+.superpowers/
+artifacts/
+dist/
+output/
+sisterrun-sandbox-iframe/
+*.zip
+*.log
+*.pyc
+scripts/__pycache__/
+index.html.before-sprite-swap
+DDRKirby(ISQ) - Let's Have an Adventure!.mp3

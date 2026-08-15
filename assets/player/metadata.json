@@ -1,0 +1,36 @@
+{
+  "group_id": null,
+  "states": [
+    {
+      "character": {
+        "id": "5d5b083f-2b8d-401a-abcb-ea1c26fe56f6",
+        "name": "player",
+        "prompt": "Fiery red, windswept short hair\n\nWhite sleeveless tank top\n\nGreen shorts\n\nWhite sneakers\n\nAesthetic inspired by Run Lola Run\n\nModern pixel art animation in the style of Celeste\n\nFull human proportions strictly enforced (No chibi style; no extreme simplification of head-to-body ratio)\n",
+        "size": {
+          "width": 256,
+          "height": 256
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-06-26T22:55:58.492119+00:00"
+      },
+      "folder": "player",
+      "frames": {
+        "rotations": {
+          "south": "player/rotations/south.png",
+          "south-east": "player/rotations/south-east.png",
+          "east": "player/rotations/east.png",
+          "north-east": "player/rotations/north-east.png",
+          "north": "player/rotations/north.png",
+          "north-west": "player/rotations/north-west.png",
+          "west": "player/rotations/west.png",
+          "south-west": "player/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-06-26T23:00:51.891923"
+}

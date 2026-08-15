@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "character": "heroine",
+    "engine": "PixiJS",
+    "usage": "AnimatedSprite frame list config",
+    "imageFormat": "transparent PNG",
+    "note": "Use PIXI.Assets.load() / PIXI.Texture.from() to load each frame path, then create new PIXI.AnimatedSprite(textures)."
+  },
+  "animations": {
+    "run": {
+      "frameCount": 8,
+      "frameSize": {
+        "width": 319,
+        "height": 382
+      },
+      "loop": true,
+      "animationSpeed": 0.18,
+      "frames": [
+        "run_cycle_8_frames_png/heroine_run_01.png",
+        "run_cycle_8_frames_png/heroine_run_02.png",
+        "run_cycle_8_frames_png/heroine_run_03.png",
+        "run_cycle_8_frames_png/heroine_run_04.png",
+        "run_cycle_8_frames_png/heroine_run_05.png",
+        "run_cycle_8_frames_png/heroine_run_06.png",
+        "run_cycle_8_frames_png/heroine_run_07.png",
+        "run_cycle_8_frames_png/heroine_run_08.png"
+      ],
+      "sheet": "run_cycle_8_frames_png/heroine_run_sheet_8frames_transparent.png"
+    },
+    "jump": {
+      "frameCount": 3,
+      "frameSize": {
+        "width": 724,
+        "height": 724
+      },
+      "loop": false,
+      "animationSpeed": 0.14,
+      "frames": [
+        "jump_3_frames_png/heroine_jump_01.png",
+        "jump_3_frames_png/heroine_jump_02.png",
+        "jump_3_frames_png/heroine_jump_03.png"
+      ],
+      "sheet": "jump_3_frames_png/heroine_jump_sheet_3frames_transparent.png"
+    },
+    "throw": {
+      "frameCount": 4,
+      "frameSize": {
+        "width": 620,
+        "height": 724
+      },
+      "loop": false,
+      "animationSpeed": 0.16,
+      "frames": [
+        "throw_4_frames_png_fixed/heroine_throw_01.png",
+        "throw_4_frames_png_fixed/heroine_throw_02.png",
+        "throw_4_frames_png_fixed/heroine_throw_03.png",
+        "throw_4_frames_png_fixed/heroine_throw_04.png"
+      ],
+      "sheet": "throw_4_frames_png_fixed/heroine_throw_sheet_4frames_transparent.png"
+    },
+    "charge": {
+      "frameCount": 4,
+      "frameSize": {
+        "width": 543,
+        "height": 724
+      },
+      "loop": false,
+      "animationSpeed": 0.16,
+      "frames": [
+        "charge_4_frames_png/heroine_charge_01.png",
+        "charge_4_frames_png/heroine_charge_02.png",
+        "charge_4_frames_png/heroine_charge_03.png",
+        "charge_4_frames_png/heroine_charge_04.png"
+      ],
+      "sheet": "charge_4_frames_png/heroine_charge_sheet_4frames_transparent.png"
+    }
+  }
+}

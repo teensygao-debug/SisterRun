@@ -1,0 +1,234 @@
+{
+  "schemaVersion": "visual-freeze-assets/v2",
+  "artBible": "../doc/ART_BIBLE.md",
+  "artRefactor": "../doc/ART_REFACTOR.md",
+  "rules": {
+    "noMixedAssets": true,
+    "transparentBackground": true,
+    "referenceLocked": true
+  },
+  "sprites": {
+    "player": {
+      "basePath": "",
+      "states": {
+        "idle": {
+          "frames": 8,
+          "frameSize": [319, 382],
+          "baselineY": 366,
+          "file": "player/run/heroine_run_sheet_8frames_transparent.png"
+        },
+        "run": {
+          "frames": 8,
+          "frameSize": [319, 382],
+          "baselineY": 366,
+          "file": "player/run/heroine_run_sheet_8frames_transparent.png"
+        },
+        "jump": {
+          "frames": 3,
+          "frameSize": [724, 724],
+          "baselineY": 604,
+          "file": "player/jump/heroine_jump_sheet_3frames_transparent.png"
+        },
+        "fall": {
+          "frames": 3,
+          "frameSize": [724, 724],
+          "baselineY": 604,
+          "file": "player/jump/heroine_jump_sheet_3frames_transparent.png"
+        },
+        "throw": {
+          "frames": 4,
+          "frameSize": [620, 724],
+          "baselineY": 577,
+          "file": "player/throw/heroine_throw_sheet_4frames_transparent.png"
+        },
+        "charge": {
+          "frames": 4,
+          "frameSize": [543, 724],
+          "baselineY": 565,
+          "file": "player/charge/heroine_charge_sheet_4frames_transparent.png"
+        },
+        "dash": {
+          "frames": 4,
+          "frameSize": [543, 724],
+          "baselineY": 565,
+          "file": "player/charge/heroine_charge_sheet_4frames_transparent.png"
+        },
+        "hurt": {
+          "frames": 3,
+          "frameSize": [724, 724],
+          "baselineY": 604,
+          "file": "player/jump/heroine_jump_sheet_3frames_transparent.png"
+        },
+        "fearlessRun": {
+          "frames": 8,
+          "frameSize": [320, 724],
+          "baselineY": 541,
+          "file": "player/fearlessmode/heroine_fearless_sheet_8frames_transparent.png"
+        }
+      }
+    },
+    "obstacles": {
+      "basePath": "",
+      "states": {
+        "smokeIdle": {
+          "frames": 4,
+          "frameSize": [627, 627],
+          "baselineY": 467,
+          "file": "enemies/smoke/smoke_obstacle_sheet_4frames_transparent.png"
+        },
+        "smokeExhale": {
+          "frames": 4,
+          "frameSize": [627, 627],
+          "baselineY": 467,
+          "file": "enemies/smoke/smoke_obstacle_sheet_4frames_transparent.png"
+        },
+        "smokeLoop": {
+          "frames": 4,
+          "frameSize": [627, 627],
+          "baselineY": 467,
+          "file": "enemies/smoke/smoke_obstacle_sheet_4frames_transparent.png"
+        },
+        "harasserIdle": {
+          "frames": 4,
+          "frameSize": [627, 627],
+          "baselineY": 567,
+          "file": "enemies/harasser/harasser_sheet_4frames_transparent.png"
+        },
+        "harasserReach": {
+          "frames": 4,
+          "frameSize": [627, 627],
+          "baselineY": 567,
+          "file": "enemies/harasser/harasser_sheet_4frames_transparent.png"
+        },
+        "harasserKnockback": {
+          "frames": 4,
+          "frameSize": [627, 627],
+          "baselineY": 567,
+          "file": "enemies/harasser/harasser_sheet_4frames_transparent.png"
+        },
+        "drunkManSway": {
+          "frames": 4,
+          "frameSize": [460, 627],
+          "baselineY": 538,
+          "file": "enemies/drunkman/drunkman_sheet_4frames_transparent.png"
+        },
+        "drunkManTumble": {
+          "frames": 4,
+          "frameSize": [460, 627],
+          "baselineY": 538,
+          "file": "enemies/drunkman/drunkman_sheet_4frames_transparent.png"
+        }
+      }
+    },
+    "items": {
+      "basePath": "",
+      "states": {
+        "padSpin": {
+          "frames": 1,
+          "frameSize": [1254, 1254],
+          "baselineY": 1254,
+          "keyLightBackground": true,
+          "file": "items/pad.png"
+        },
+        "courageEnergyPack": {
+          "frames": 1,
+          "frameSize": [64, 64],
+          "baselineY": 64,
+          "file": "items/sanitary-pad-energy-pack.png"
+        },
+        "heart": {
+          "frames": 1,
+          "frameSize": [1254, 1254],
+          "baselineY": 1254,
+          "keyLightBackground": true,
+          "file": "items/heart_full.png"
+        }
+      }
+    },
+    "fx": {
+      "basePath": "",
+      "states": {
+        "boom": {
+          "frames": 1,
+          "frameSize": [1448, 1086],
+          "keyLightBackground": true,
+          "file": "fx/boom_01.png"
+        },
+        "bang": {
+          "frames": 1,
+          "frameSize": [1448, 1086],
+          "keyLightBackground": true,
+          "file": "fx/bang.png"
+        },
+        "ko": {
+          "frames": 1,
+          "frameSize": [1448, 1086],
+          "keyLightBackground": true,
+          "file": "fx/ko.png"
+        },
+        "spark": {
+          "frames": 1,
+          "frameSize": [1254, 1254],
+          "keyLightBackground": true,
+          "file": "fx/ stars_01.png"
+        },
+        "speedLine": {
+          "frames": 1,
+          "frameSize": [2172, 724],
+          "keyLightBackground": true,
+          "file": "fx/speedline.png"
+        },
+        "fearlessGlow": {
+          "frames": 1,
+          "frameSize": [1254, 1254],
+          "keyLightBackground": true,
+          "file": "fx/ stars_01.png"
+        },
+        "comicPop": {
+          "frames": 1,
+          "frameSize": [1448, 1086],
+          "keyLightBackground": true,
+          "file": "fx/boom_01.png"
+        },
+        "starHit": {
+          "frames": 1,
+          "frameSize": [1254, 1254],
+          "keyLightBackground": true,
+          "file": "fx/ stars_01.png"
+        },
+        "dust": {
+          "frames": 1,
+          "frameSize": [1448, 1086],
+          "keyLightBackground": true,
+          "file": "fx/dust.png"
+        },
+        "landingDust": {
+          "frames": 1,
+          "frameSize": [1448, 1086],
+          "keyLightBackground": true,
+          "file": "fx/dust.png"
+        }
+      }
+    }
+  },
+  "background": {
+    "basePath": "backgrounds/",
+    "files": {
+			"day": "daytime_v2.webp",
+			"night": "nighttime_v2.webp"
+		}
+	},
+  "ui": {
+    "basePath": "ui/",
+    "files": {
+      "heartFull": "../items/heart_full.png",
+      "padIcon": "../items/pad.png",
+      "courageBarBg": "hud/courage_bar_bg.png",
+      "courageBarFill": "hud/courage_bar_fill.png",
+      "fearlessTimerBg": "hud/fearless_timer_bg.png",
+      "scoreLabel": "hud/score_label.png",
+      "speechBubbleSmall": "speech/speech_bubble_small.png",
+      "speechBubbleMedium": "speech/speech_bubble_medium.png"
+    }
+  }
+}
