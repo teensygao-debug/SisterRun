@@ -510,6 +510,281 @@
       transform: translate(0, 0);
     }
 
+    .endActions {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .endActions .bigButton {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 80px;
+      margin-top: 0;
+      padding: 0 24px;
+      appearance: none;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    html.cards-open,
+    body.cards-open {
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #03040a;
+    }
+
+    body.cards-open {
+      display: block;
+    }
+
+    body.cards-open #gameShell,
+    body.cards-open #orientationNotice {
+      display: none !important;
+    }
+
+    #cardsPage {
+      position: relative;
+      isolation: isolate;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100svh;
+      overflow: hidden;
+      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(34px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+      background:
+        radial-gradient(circle at 14% 12%, rgba(255, 0, 184, .18), transparent 24%),
+        radial-gradient(circle at 88% 18%, rgba(36, 216, 255, .16), transparent 22%),
+        radial-gradient(circle at 50% 76%, rgba(83, 33, 180, .18), transparent 35%),
+        linear-gradient(180deg, #050610 0%, #090319 48%, #03040a 100%);
+      color: #fff1c3;
+    }
+
+    #cardsPage::before,
+    #cardsPage::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    #cardsPage::before {
+      inset: 0;
+      opacity: .58;
+      background-image:
+        radial-gradient(circle, rgba(255, 209, 66, .95) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(36, 216, 255, .9) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255, 42, 183, .85) 0 1.2px, transparent 1.7px);
+      background-position: 15px 25px, 85px 120px, 150px 55px;
+      background-size: 148px 148px, 210px 210px, 270px 270px;
+    }
+
+    #cardsPage::after {
+      inset: 10px;
+      border: 1px solid rgba(255, 200, 44, .34);
+      box-shadow: inset 0 0 28px rgba(255, 200, 44, .08);
+    }
+
+    .cardsFrame {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    .cardsBackLink {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 8px 14px;
+      border: 2px solid rgba(255, 200, 44, .78);
+      background: rgba(3, 4, 10, .82);
+      color: #ffd75e;
+      font-family: var(--pixel-font);
+      font-size: 13px;
+      line-height: 1;
+      text-decoration: none;
+      box-shadow: 4px 4px 0 rgba(255, 42, 183, .5);
+    }
+
+    .cardsBackLink:hover,
+    .cardsBackLink:focus-visible {
+      color: #fff;
+      border-color: var(--cyan);
+      outline: 2px solid rgba(36, 216, 255, .55);
+      outline-offset: 3px;
+    }
+
+    .cardsHero {
+      max-width: 820px;
+      margin: 20px auto 30px;
+      text-align: center;
+    }
+
+    .cardsEyebrow {
+      color: var(--cyan);
+      font-family: var(--pixel-font);
+      font-size: clamp(10px, 1.25vw, 14px);
+      letter-spacing: .18em;
+      text-shadow: 0 0 10px rgba(36, 216, 255, .72);
+    }
+
+    #cardsTitle {
+      margin: 12px 0 10px;
+      color: #ffd75e;
+      font-family: Georgia, "Songti SC", "STSong", serif;
+      font-size: clamp(38px, 6vw, 76px);
+      line-height: .98;
+      letter-spacing: .04em;
+      text-shadow: 0 0 16px rgba(255, 200, 44, .45), 4px 4px 0 #50133f;
+    }
+
+    .cardsIntro {
+      color: rgba(255, 241, 195, .84);
+      font-size: clamp(14px, 1.7vw, 18px);
+      line-height: 1.6;
+    }
+
+    .cardsIntro strong {
+      color: var(--pink);
+      font-weight: 900;
+    }
+
+    .cardsStatus {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 9px 18px;
+      margin-top: 16px;
+      color: var(--pink);
+      font-family: var(--pixel-font);
+      font-size: clamp(10px, 1.2vw, 13px);
+    }
+
+    #cardsProgress {
+      color: var(--gold);
+    }
+
+    .cardsGrid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(26px, 4vw, 48px) clamp(18px, 3vw, 34px);
+      align-items: start;
+      width: min(1020px, 100%);
+      margin: 0 auto;
+    }
+
+    .cardSlot {
+      min-width: 0;
+      text-align: center;
+    }
+
+    .flipCard {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 766 / 985;
+      margin: 0 auto;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      perspective: 1600px;
+      transition: transform .2s ease, filter .2s ease;
+      filter: drop-shadow(0 14px 20px rgba(0, 0, 0, .58));
+    }
+
+    .flipCard:hover {
+      transform: translateY(-5px);
+      filter: drop-shadow(0 18px 24px rgba(255, 32, 181, .18));
+    }
+
+    .flipCard:focus-visible {
+      outline: none;
+    }
+
+    .flipCardInner {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform .72s cubic-bezier(.2, .72, .2, 1);
+    }
+
+    .flipCard.is-flipped .flipCardInner {
+      transform: rotateY(180deg);
+    }
+
+    .flipCardFace {
+      position: absolute;
+      inset: 0;
+      display: block;
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .flipCardBack {
+      transform: rotateY(180deg);
+    }
+
+    .flipCardFace img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .flipCardFront img {
+      transform: scale(1.067, .949);
+      transform-origin: center top;
+    }
+
+    .cardsFooter {
+      margin: clamp(34px, 6vw, 64px) auto 0;
+      color: rgba(255, 241, 195, .62);
+      font-family: var(--pixel-font);
+      font-size: 10px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      #cardsPage {
+        padding-inline: max(14px, env(safe-area-inset-left)) max(14px, env(safe-area-inset-right));
+      }
+
+      .cardsHero {
+        margin: 18px auto 24px;
+      }
+
+      .cardsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 26px 14px;
+      }
+
+      .flipCard {
+        max-width: 260px;
+      }
+
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .flipCard,
+      .flipCardInner {
+        transition: none;
+      }
+    }
+
     #startOverlay .bigButton {
       display: block;
       width: 60%;
@@ -660,6 +935,37 @@
 
       .touchButton.wide {
         width: clamp(100px, 18vw, 132px);
+      }
+
+      #endOverlay {
+        padding: 12px;
+      }
+
+      #endOverlay .panel {
+        padding: 12px 22px;
+      }
+
+      #endOverlay h2 {
+        margin-top: 0;
+        font-size: clamp(26px, 4.5vw, 38px);
+      }
+
+      #endOverlay .panel p {
+        margin-top: 8px;
+        font-size: clamp(13px, 2vw, 18px);
+      }
+
+      #endOverlay .endActions {
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      #endOverlay .endActions .bigButton {
+        height: 56px;
+        min-width: min(420px, 76vw);
+        border-width: 4px;
+        font-size: clamp(24px, 4vw, 34px);
+        box-shadow: 5px 5px 0 var(--ink), inset 0 4px 0 rgba(255, 232, 184, .32);
       }
     }
 
@@ -842,7 +1148,10 @@
       <div class="panel">
         <h2 id="endTitle">再跑一次。</h2>
         <p id="endStats">Score 0</p>
-        <button id="restartButton" class="bigButton" type="button">再跑一局</button>
+        <div class="endActions">
+          <button id="restartButton" class="bigButton" type="button">再跑一局</button>
+          <a id="powerCardsButton" class="bigButton" href="#cards">翻转卡牌</a>
+        </div>
       </div>
     </section>
 
@@ -857,6 +1166,74 @@
 
     <div id="fileProtocolWarning" hidden></div>
   </main>
+
+  <section id="cardsPage" aria-labelledby="cardsTitle" tabindex="-1" hidden>
+    <div class="cardsFrame">
+      <a id="cardsBackButton" class="cardsBackLink" href="#">← 返回游戏</a>
+      <header class="cardsHero">
+        <p class="cardsEyebrow">WeUs · PERIOD POWER CARDS</p>
+        <h1 id="cardsTitle">翻转WeUs卡牌</h1>
+        <p class="cardsIntro">四个主题带你重新认识月经与身体：<strong>月经</strong>·<strong>关爱</strong>·<strong>连结</strong>·<strong>创造</strong></p>
+        <div class="cardsStatus" aria-live="polite">
+          <span id="cardsProgress">0 / 6 已翻转</span>
+          <span>✦ 点击卡牌可翻回正面</span>
+        </div>
+      </header>
+
+      <div class="cardsGrid" role="list" aria-label="六张 WeUs 主题科普卡牌">
+        <article class="cardSlot" role="listitem">
+          <button class="flipCard" type="button" aria-pressed="false" aria-label="翻转卡牌 1：月经周期">
+            <span class="flipCardInner">
+              <span class="flipCardFace flipCardFront"><img src="./assets/cards/weus-card-cover.png" width="766" height="985" alt="WeUs 卡牌正面" /></span>
+              <span class="flipCardFace flipCardBack"><img src="./assets/cards/weus-back-01-period-renewal.webp" width="766" height="985" alt="月经周期重塑科普卡牌" /></span>
+            </span>
+          </button>
+        </article>
+        <article class="cardSlot" role="listitem">
+          <button class="flipCard" type="button" aria-pressed="false" aria-label="翻转卡牌 2：卫生巾历史">
+            <span class="flipCardInner">
+              <span class="flipCardFace flipCardFront"><img src="./assets/cards/weus-card-cover.png" width="766" height="985" alt="WeUs 卡牌正面" /></span>
+              <span class="flipCardFace flipCardBack"><img src="./assets/cards/weus-back-02-pad-history.webp" width="766" height="985" alt="抛弃式卫生巾历史科普卡牌" /></span>
+            </span>
+          </button>
+        </article>
+        <article class="cardSlot" role="listitem">
+          <button class="flipCard" type="button" aria-pressed="false" aria-label="翻转卡牌 3：月经平权">
+            <span class="flipCardInner">
+              <span class="flipCardFace flipCardFront"><img src="./assets/cards/weus-card-cover.png" width="766" height="985" alt="WeUs 卡牌正面" /></span>
+              <span class="flipCardFace flipCardBack"><img src="./assets/cards/weus-back-03-period-equity.webp" width="766" height="985" alt="苏格兰月经用品平权科普卡牌" /></span>
+            </span>
+          </button>
+        </article>
+        <article class="cardSlot" role="listitem">
+          <button class="flipCard" type="button" aria-pressed="false" aria-label="翻转卡牌 4：领袖也会流血">
+            <span class="flipCardInner">
+              <span class="flipCardFace flipCardFront"><img src="./assets/cards/weus-card-cover.png" width="766" height="985" alt="WeUs 卡牌正面" /></span>
+              <span class="flipCardFace flipCardBack"><img src="./assets/cards/weus-back-04-leaders-bleed.webp" width="766" height="985" alt="Leaders bleed, period 双语卡牌" /></span>
+            </span>
+          </button>
+        </article>
+        <article class="cardSlot" role="listitem">
+          <button class="flipCard" type="button" aria-pressed="false" aria-label="翻转卡牌 5：姐妹连结">
+            <span class="flipCardInner">
+              <span class="flipCardFace flipCardFront"><img src="./assets/cards/weus-card-cover.png" width="766" height="985" alt="WeUs 卡牌正面" /></span>
+              <span class="flipCardFace flipCardBack"><img src="./assets/cards/weus-back-05-sisterhood.webp" width="766" height="985" alt="Sisterhood is powerful 双语卡牌" /></span>
+            </span>
+          </button>
+        </article>
+        <article class="cardSlot" role="listitem">
+          <button class="flipCard" type="button" aria-pressed="false" aria-label="翻转卡牌 6：关爱自己">
+            <span class="flipCardInner">
+              <span class="flipCardFace flipCardFront"><img src="./assets/cards/weus-card-cover.png" width="766" height="985" alt="WeUs 卡牌正面" /></span>
+              <span class="flipCardFace flipCardBack"><img src="./assets/cards/weus-back-06-self-preservation.webp" width="766" height="985" alt="Self-preservation 双语卡牌" /></span>
+            </span>
+          </button>
+        </article>
+      </div>
+
+      <footer class="cardsFooter">TOGETHER WE CREATE · 月经不是秘密，了解身体就是力量</footer>
+    </div>
+  </section>
 
   <aside id="orientationNotice" role="dialog" aria-label="请旋转手机" aria-live="polite">
     <div class="orientationCard">
@@ -909,6 +1286,35 @@
         gamepadStatus: document.getElementById("gamepadStatus"),
         fileWarning: document.getElementById("fileProtocolWarning")
       };
+
+      const cardGallery = {
+        page: document.getElementById("cardsPage"),
+        progress: document.getElementById("cardsProgress"),
+        cards: [...document.querySelectorAll(".flipCard")]
+      };
+      let cardsPageOpen = false;
+
+      function updateCardsProgress() {
+        const flipped = cardGallery.cards.filter(card => card.classList.contains("is-flipped")).length;
+        cardGallery.progress.textContent = `${flipped} / ${cardGallery.cards.length} 已翻转`;
+      }
+
+      function syncCardsPage() {
+        const shouldOpen = window.location.hash === "#cards";
+        if (shouldOpen === cardsPageOpen) return;
+        cardsPageOpen = shouldOpen;
+        document.documentElement.classList.toggle("cards-open", shouldOpen);
+        document.body.classList.toggle("cards-open", shouldOpen);
+        hud.shell.hidden = shouldOpen;
+        cardGallery.page.hidden = !shouldOpen;
+        document.title = shouldOpen ? "翻转卡牌 | WeUs" : "姐妹快跑";
+        if (shouldOpen) {
+          window.scrollTo(0, 0);
+          requestAnimationFrame(() => cardGallery.page.focus({ preventScroll: true }));
+        } else {
+          requestAnimationFrame(() => hud.restartButton.focus({ preventScroll: true }));
+        }
+      }
 
       const ART = {
         ink: "#07080f",
@@ -3320,6 +3726,7 @@
       }
 
       function pollGamepad() {
+        if (cardsPageOpen) return;
         if (typeof navigator.getGamepads !== "function") {
           setGamepadStatus("当前浏览器不支持手柄 · 可使用键盘或触控", false);
           return;
@@ -3365,6 +3772,13 @@
       }
 
       window.addEventListener("keydown", (e) => {
+        if (cardsPageOpen) {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            window.location.hash = "";
+          }
+          return;
+        }
         if (e.code === "ArrowUp" || e.key === "ArrowUp") {
           e.preventDefault();
           if (game && game.state === "ready") startGame();
@@ -3387,6 +3801,7 @@
       });
 
       window.addEventListener("keyup", (e) => {
+        if (cardsPageOpen) return;
         if (e.code === "Space") {
           e.preventDefault();
           if (keyboardStartAttackPending) {
@@ -3399,6 +3814,14 @@
 
       hud.startButton.addEventListener("click", startGame);
       hud.restartButton.addEventListener("click", startGame);
+      cardGallery.cards.forEach(card => {
+        card.addEventListener("click", () => {
+          const flipped = card.classList.toggle("is-flipped");
+          card.setAttribute("aria-pressed", String(flipped));
+          updateCardsProgress();
+        });
+      });
+      window.addEventListener("hashchange", syncCardsPage);
       hud.reduceEffects.addEventListener("change", () => {
         applyReducedEffects(hud.reduceEffects.checked, true);
       });
@@ -3438,6 +3861,8 @@
 
       resetGame();
       resetOverlays();
+      syncCardsPage();
+      updateCardsProgress();
       applyReducedEffects(settings.reducedEffects, false);
       configureDevWarning();
       loadVisualAssetPhase("core").catch(error => {
