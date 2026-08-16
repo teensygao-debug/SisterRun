@@ -89,6 +89,13 @@ test("end summary counts knockbacks, excludes jumped smoke, and resets for a new
     const firstTitle = await page.locator('#endTitle').textContent();
     if (firstTitle !== '恭喜你撞飞了 1 个老登') throw new Error('first run title: ' + firstTitle);
 
+    const powerCardsLink = page.getByRole('link', { name: '翻转卡牌' });
+    if (!await powerCardsLink.isVisible()) throw new Error('flip-card link is not visible on the end screen');
+    const powerCardsHref = await powerCardsLink.getAttribute('href');
+    if (powerCardsHref !== '#cards') {
+      throw new Error('flip-card link href: ' + powerCardsHref);
+    }
+
     await page.getByRole('button', { name: '再跑一局' }).click();
     for (let index = 0; index < 2000 && await page.locator('#endOverlay').isHidden(); index += 30) {
       await step(30);
